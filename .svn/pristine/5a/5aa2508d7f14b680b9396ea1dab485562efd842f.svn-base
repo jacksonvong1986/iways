@@ -1,0 +1,125 @@
+@media screen and (max-width: 980px) {
+  //主页
+  .header ul.right { float: none!important; margin-left: 20px;}
+}
+
+@media screen and (max-width: 1050px) {
+  //车型列表看板
+  .show-row {
+    dd p{
+      line-height: 22px!important;
+    }
+    ul {
+      padding-top: 10px!important;
+    }
+  }
+}
+
+
+
+
+@media screen and (max-width: 1100px) {
+  //车型列表看板
+  .show-row ul {
+    padding-top: 15px!important;
+  }
+}
+
+@media screen and (max-width: 1150px) {
+  //厂商销量目标看板
+  .sales-status {
+    .right b{font-size: 20px!important;}
+  }
+
+  //车型列表看板
+  .show-row dd {
+    a{font-size: 14px!important;}
+    p{font-size: 12px!important;}
+  }
+}
+
+
+@media screen and (max-width: 1200px) {
+    //主页
+    //.right-menu{position:absolute!important}
+}
+
+
+@media screen and (max-width: 1250px) {
+  //车型列表看板
+  .carlist-main .show-col .cards{
+    width: calc(50% - 20px) !important;
+  }
+  .show-row {
+    li.right{
+      font{white-space: nowrap;text-overflow: ellipsis;  overflow: hidden;}
+    }
+  }
+}
+
+//@media screen and (max-width: 1260px) {
+//  //主页
+//  .home .data > li.left-content strong, .home .data > li.center-content strong{
+//    font-size: 12px!important;
+//  }
+//}
+
+@media screen and (max-width: 1400px) {
+    .indexvc{
+        div {
+            ul.type3{
+                li {width:32.333%;}
+                li {width:32.333%;}
+                li:nth-child(4n+1) {margin-left: 1.5%;}
+                li:nth-child(3n+1) {margin-left: 0;}
+            }
+        }
+    }
+}
+//
+//@media screen and (max-width: 1420px) {
+//  //主页
+//  .home .data > li.left-content strong, .home .data > li.center-content strong{
+//    font-size: 16px!important;
+//    font-weight: 600!important;
+//  }
+//}
+
+
+@media screen and (max-width: 1500px) {
+  //车型列表看板
+  .show-row{
+      dl{
+        width: 42%!important;margin-right: 3%!important;
+      }
+      ul{
+        width: 25%!important;
+      }
+  }
+
+
+}
+
+
+@media screen and (max-width: 1580px) {
+  //首页
+  //.home .data > li.left-content dd div.left, .home .data > li.center-content dd div.left{width: 100%}
+  //.home .data li.left-content dd div.left,
+  //.home .data li.center-content dd div.left,
+  //.home .data li.left-content dd div.right,
+  //.home .data li.center-content dd div.right{float: none; width: 100% !important; padding: 15px 20px; text-align: left}
+  //.home .data li.left-content dd span,
+  //.home .data li.center-content dd span{width: 32%}
+  //.home .data li.right-content {height: 515px!important;}
+
+
+}
+
+
+@media screen and (min-width: 1580px) {
+  .carlist-main .show-col .cards{
+    width: calc(25% - 20px) !important;
+  }
+
+
+}

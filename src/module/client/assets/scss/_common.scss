@@ -1,0 +1,290 @@
+@import "./mixin.scss";
+
+// !
+// * -----------------------------------公用样式组件-----------------------------------------
+// *
+
+// 公共字体颜色 */
+.font-green{color:#669900;}
+.font-red {color:#f04048;}
+.font-black{color: #333}
+.font-gray {color: #666}
+.font-pink{color: #fb6b72}
+.font-blue{color:#0080c1;}
+.font-blue-b {color:#4c8a95}
+.font-blue-c {color:#329ad1}
+
+b,em,font,p,cite{cursor:text;}
+
+.icon-down{color: #f04048}
+.icon-up{color: #669900}
+.icon-triangledownfill{color: #f04048;font-size: 12px;}
+.icon-triangleupfill{color: #669900;font-size: 12px;}
+//.icon-chexian{font-size:12px;}
+
+.mgr20{margin-right: 20px}
+.mgrl15{margin-left: 15px}
+
+// 过度时间 */
+.animated  {
+  &.time {-webkit-animation-duration: .45s;  -moz-animation-duration: .45s;  -o-animation-duration: .45s;  animation-duration: .45s;}
+  &.time0{-webkit-animation-duration: .5s;  -moz-animation-duration: .5s;  -o-animation-duration: .5s;  animation-duration: .5s;}
+  &.time1{-webkit-animation-delay:0.2s;animation-delay:0.2s;}
+  &.time2{-webkit-animation-delay:0.5s;animation-delay:0.5s;}
+  &.time3{-webkit-animation-delay:0.8s;animation-delay:0.9s;}
+  &.time4{-webkit-animation-delay:1.2s;animation-delay:1.2s;}
+  &.time5{-webkit-animation-delay:1.5s;animation-delay:1.5s;}
+  &.time6{-webkit-animation-delay:1.7s;animation-delay:1.7s;}
+}
+
+// badge */
+.badge{
+  @include font-adjust(12px, 12px, #fff, center, 700);
+  display: inline-block;min-width: 10px;padding: 3px 7px;white-space: nowrap;vertical-align: baseline;background-color: #777;border-radius: 10px;
+  &.red { background:#f56c6c; color:#fff}
+  &.green { background:#1CAF9A; color:#fff}
+}
+
+// 页面按钮 */
+.bi-button{
+  @include box-Module(inline-block, auto, 30px, 0, 0 5px, #00b4f3, 1px solid #01a4df);
+  @include font-adjust(12px, 28px, #fff);
+  @include transition();
+  @include radius(1234, 2px);
+  cursor: pointer;min-width: 70px;
+  &:hover,
+  &:focus{
+    background-color: #2ec9ff;
+  }
+  i{margin:0 10px 0 5px;float: right; line-height: 30px;}
+}
+
+// 问号tooltip */
+.tootip-helf{
+  @include box-Module(inline-block, 16px, 16px, 2px 0 0 3px, 0, #379bcc);
+  @include font-adjust(12px, 16px, #fff);
+  @include radius(1234, 100%);
+  cursor: pointer;
+  &:hover{background-color: #f04048}
+}
+
+//分页 */
+.pagination-box{
+  @include clearfix();
+  display: block; text-align: center; margin-bottom: 20px;
+}
+
+//加载更多 */
+.load-more{
+  display: block;text-align: center;margin-bottom: 20px;
+  span{
+    @include font-adjust(14px, 16px, #c1c8d0);cursor: pointer;
+    &:hover{color: #339ace; text-decoration: underline}
+  }
+}
+
+// bi-bar 更改条件按钮
+.bar-change-btn{
+  @include button(auto, 24px); padding: 0 10px; cursor: pointer;
+}
+
+// 已选择了的条件样式（多色）
+.panel-selected{
+  @include font-adjust(13px, 1, #333, left);
+  margin-bottom: 12px;
+  span{
+    display: inline-block; padding: 3px 5px; background-color: #fff; margin-left: 5px; border: 1px solid transparent; color: #999;
+    &:hover{ border-color: #f04048;  }
+    i{
+      font-size: 12px; cursor: pointer; padding-left: 5px;
+      &:hover{ color: #f04048}
+    }
+  }
+  font{
+    @include a-style();
+    cursor: pointer; margin-left: 5px;
+  }
+}
+// 已选择了的条件样式（通用）
+.panel-selected_vb{
+  padding: 5px 15px; color: #999; font: 14px/30px "Microsoft YaHei"; margin: 20px 20px 15px; border: 1px solid #f1f1f1;
+  em{ color: #333; margin-right: 5px; }
+  span{
+    @include box-Module(inline-block, auto, 24px, 0 5px 0 0, 0 5px, #fff, 1px solid #c1c8d0);
+    cursor: pointer;line-height: 22px; color: #666; vertical-align: middle; font-size: 12px;
+    &:hover{color: #339acd; border-color: #339acd}
+  }
+  i{
+    font-size: 12px; cursor: pointer; padding-left: 5px;
+    &:hover{ color: #f04048}
+  }
+  font{
+    @include a-style();
+    cursor: pointer; margin-left: 5px;
+  }
+}
+// 已选择了的条件样式（无边框）
+.panel-selected_vc{
+  display: inline-block;color: #999; font: 14px/1 "Microsoft YaHei";
+  span{
+    @include text-hide();
+    display: inline-block; max-width: calc(100% - 80px);
+  }
+  em{ color: #333; margin-right: 5px; }
+  font{
+    @include box-Module(inline-block, auto, 24px, 0 5px 0 0, 0 5px, #fff, 1px solid #c1c8d0);
+    cursor: pointer;line-height: 22px; color: #666; vertical-align: middle; font-size: 12px;
+    &:hover{color: #339acd; border-color: #339acd}
+  }
+  i{
+    position: relative; top: -1px;font-size: 12px; cursor: pointer; padding-left: 5px;
+    &:hover{ color: #f04048}
+  }
+  cite{
+    @include a-style();
+    position: relative; top:2px; cursor: pointer; margin-left: 5px;
+  }
+}
+
+//朴素按钮
+.btn-plain{
+  @include box-Module(inline-block, auto, 30px, 0 10px 0 0, 0 15px, #fafafa, 1px solid #dcdcdc);
+  cursor: pointer; line-height: 28px; text-align: center; color: #333;
+  &:hover{ color: #339acd; border-color: #339acd; background-color: rgba(51, 154, 205, 0.11)}
+  &.on{background-color: #339acd; color: #fff; border-color: #339acd}
+}
+//正常按钮
+.btn-primary{
+  @include button($width:auto, $background-color:#00b4f3); padding: 0 12px;
+}
+
+
+// 遮罩层车型选择器
+.dialog-va{
+  .cont{
+    width: 100%; height:420px; overflow: hidden; border-bottom: 1px solid #eee;
+    div{overflow: auto; overflow-x: hidden; width: 100%; height: inherit; padding-bottom: 30px;}
+  }
+  ul{
+    @include clearfix();
+    @include font-adjust(14px, 34px, #333, center, null);
+    height:34px;  border-top:  1px solid #eee; border-bottom: 1px solid #eee; background-color: #f4f4f4; padding: 0 10px;
+  }
+  li{
+    width: 34px; float: left; cursor: pointer;
+    &:hover, &.on{color: #0080c1}
+  }
+  dl{
+    @include clearfix();
+    @include font-adjust(14px, 34px, #555, center, 100);
+    width: 100%; padding: 5px 30px 5px 10px; margin-bottom: 10px;
+    &:last-child{
+      margin-bottom: 50px;
+      dd{border: none}
+    }
+  }
+  dt{
+    width: 34px; float: left;
+  }
+  dd{
+    float: left;
+    @include clearfix();
+    @include calc(100%, 34px);
+    border-bottom: 1px solid #f6f6f6;
+    span{
+      display: block; float: left; padding:0 10px; margin-right: 10px; cursor: pointer;
+      &:hover, &.on{color: #0080c1}
+    }
+  }
+}
+
+// 弹出层车型选择器
+.popover-va{
+  $height: 318px;
+  @include clearfix();
+  position: relative; max-height: $height; overflow: hidden;background-color: #fff;
+  dt{
+    @include position(0, null, 0, 0);
+    width: 40px; float: left;border-right: 1px solid #d9d9d9;background-color: #f9f9f9;padding: 8px 0;text-align: center;
+    em{
+      @include font-adjust(13px, 18px, #666, center);
+      display: block; width: 18px; height: 18px;  margin: 2px auto; border-radius: 2px; cursor: pointer;
+      &:hover{
+        background-color: #f04048; color: #fff;
+      }
+    }
+  }
+  dd{
+    float: left; height: $height; width: 210px; overflow-y: auto; overflow-x: hidden; padding: 0 0 5px 40px;
+  }
+  ul{
+    border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px;
+  }
+  li{
+    @include font-adjust(14px, 32px, #333, left);
+    cursor: pointer;padding: 0 10px; height: 32px;
+    &:hover{
+      background-color: #f2f2f2;
+    }
+  }
+}
+
+
+// 模拟element的selection
+.popover-selection{
+  dl{
+    padding: 12px 0; border-bottom: 1px solid #e4e7ed;
+    &:last-child{border-bottom: none}
+  }
+  dt{
+    @include font-adjust(12px, 28px, #909399, left);
+    padding:0 20px; height: 28px;
+  }
+  dd{
+    @include font-adjust(14px, 34px, #606266, left);
+    padding:0 20px;height: 34px; cursor: pointer;
+    &:hover{ background-color: #f5f7fa}
+  }
+}
+
+
+//步骤条
+.step-bar{
+  @include clearfix(); padding-bottom: 20px;
+  li{
+    @include clearfix();
+    $step-width: 28%;
+    float: left; width: $step-width;
+    &:last-child{ width: calc( 100% - (3 * #{$step-width}) )}
+    &.active{
+      span { background-color: #339acd; color: #fff; border-color: #339acd}
+      div{ color: #666; }
+    }
+    &.end{
+      span{border-color: #339acd}
+      i{border-color: #339acd; color: #339acd}
+      em{background-color: #339acd}
+    }
+  }
+  span{
+    @include font-adjust(12px, 24px, #cdcdcb);
+    float: left; display: block; width: 26px; height: 26px;border-radius: 50%; border: 1px solid #d1d1d1;
+  }
+  div{
+    @include font-adjust(12px, 20px, #999, left, 700);
+    float: left; display: block; position: relative; padding: 0 10px; width: calc(100% - 26px);
+    em{ display: block; float: right; width: calc(100% - 46px); background: #eaeaea; height: 1px; margin-top: 10px; margin-left: 10px; }
+    small{ position: absolute; top: 20px; left: 10px; font-weight: 100; }
+  }
+}
+
+// loading-box 样式
+.loading-box{
+  min-height: 200px;
+}
+
+
+// a-style通用点击样式
+.link{
+  @include a-style($underLine:none)
+}

@@ -1,0 +1,84 @@
+*{margin: 0;padding: 0;list-style: none; box-sizing: border-box;-moz-box-sizing:border-box; /* Firefox */ -webkit-box-sizing:border-box; /* Safari */}
+
+/** 清除内外边距 **/
+body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, /* structural elements 结构元素 */
+dl, dt, dd, ul, ol, li, /* list elements 列表元素 */
+pre, /* text formatting elements 文本格式元素 */
+form, fieldset, legend, button, input, textarea, /* form elements 表单元素 */
+th, td /* table elements 表格元素 */ {margin: 0;padding: 0;}
+
+/** 设置默认字体 **/
+body,button, input, select, textarea /* for ie */ {font-size: 14px;font-family: 'LatoRegular', 'Lucida Grande', 'Lucida Sans Unicode', Helvetica, sans-serif !important;}
+h1, h2, h3, h4, h5, h6 { font-size: 100%; }
+address, cite, dfn, em, var, i, b, dl, dt, dd  { font-style: normal; } /* 将斜体扶正 */
+code, kbd, pre, samp { font-family: courier new, courier, monospace; } /* 统一等宽字体 */
+small { font-size: 12px; } /* 小于 12px 的中文很难阅读，让 small 正常化 */
+
+/** 重置列表元素 **/
+ul, ol { list-style: none; }
+
+/** 重置文本格式元素 **/
+a { text-decoration: none; cursor: pointer}
+
+/** 重置表单元素 **/
+legend { color: #000; } /* for ie6 */
+fieldset, img { border: 0; } /* img 搭车：让链接里的 img 无边框 */
+button, input, select, textarea { font-size: 100%; } /* 使得表单元素在 ie 下能继承字体大小 */ /* 注：optgroup 无法扶正 */
+
+/** 重置表格元素 **/
+table { border-collapse: collapse; border-spacing: 0; width: 100%; }
+
+body {font-family: 'Microsoft YaHei','微软雅黑','LatoRegular', 'Lucida Grande', 'Lucida Sans Unicode', Helvetica, sans-serif ;}
+
+.pd0{padding: 0!important;}
+.pdt0{padding-top: 0!important;}
+.pdl0{padding-left: 0!important;}
+.pdr0{padding-right: 0!important;}
+.pdb0{padding-bottom: 0!important;}
+.mg0{margin: 0!important;}
+.mgt0{margin-top: 0!important;}
+.mgl0{margin-left: 0!important;}
+.mgr0{margin-right: 0!important;}
+.mgb0{margin-bottom: 0!important;}
+
+/* 重写 组件样式 */
+.el-popover{padding: 0!important;}
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .btn-next,
+.el-pagination.is-background .el-pager li,
+.el-input__inner{border-radius: 0!important;}
+.el-dropdown-menu__item span {display: block}
+.el-dropdown-menu__item a {color: #606266; display: block}
+.el-dropdown-menu__item a:hover {color: #339ace}
+
+.login .el-input__inner{background-color: #5b6068; height: 48px; border: none; color: #b5bcc6; font-size: 16px; padding: 0 20px 0 70px; border-radius: 0}
+.login input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px #5b6068 inset !important; -webkit-text-fill-color: #b5bcc6!important;  }
+.login .el-form-item{margin-bottom: 26px;}
+.login .el-button--primary{background-color:#48a3d6; padding: 12px 20px; border-radius: 2px; font-size: 18px;}
+.login .el-button--primary:hover{background-color:#51b5ed;}
+.login .el-checkbox{font-size: 14px; color: rgba(255, 255, 255, 0.6)}
+.login .el-checkbox__input.is-checked+.el-checkbox__label{color:rgba(255, 255, 255, 0.6)}
+.login .el-checkbox__input.is-checked .el-checkbox__inner{background-color:transparent;border-color:rgba(213, 216, 220, 0.2)}
+.login .el-checkbox__inner::after{border-color: #5da9d4}
+.login .el-checkbox__inner{background-color: transparent}
+
+.home-top-popover.el-popper[x-placement^=bottom]{margin-top: 9px!important;}
+
+.home .el-carousel__arrow--right{right: 5%;}
+.home .el-carousel__arrow--left{left: 5%;}
+.home .el-carousel__arrow{width: 80px; height: 80px;}
+.home .el-carousel__arrow i{font-size: 80px;}
+.home .el-carousel__button{width: 16px; height: 16px; overflow: hidden; border-radius: 50%;}
+.home .el-carousel__indicator{padding: 30px 5px;}
+
+.home .swiper-pagination{bottom: 30px!important;}
+.home .swiper-bullet{ width: 16px;  height: 16px;  display: inline-block;  border-radius: 100%;  background: #fff;  opacity: 0.2;  cursor: pointer;  margin: 0 6px; position: relative; z-index: 2;  }
+.home .swiper-bullet-active{ opacity: 1; background: #fff; }
+.home .swiper-button{ border: none; outline: 0; padding: 0; margin: 0; height: 80px; width: 80px; cursor: pointer; transition: .3s; border-radius: 50%; background-color: rgba(31,45,61,.11); color: #fff; position: absolute; top: 50%; z-index: 10; transform: translateY(-50%); text-align: center; font-size: 12px; background-image: initial}
+.home .swiper-button:hover{background-color: rgba(31, 45, 61, 0.35);}
+.home .swiper-button i {font-size: 80px;}
+.home .swiper-button-prev{ left: 5%}
+.home .swiper-button-next{ right: 5%}
+.home .swiper-container-autoheight, .swiper-container-autoheight .swiper-slide{height: 600px;}
+
+.news .el-breadcrumb__inner, .el-breadcrumb__inner a{font-weight: 100}

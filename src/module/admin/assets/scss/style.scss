@@ -1,0 +1,515 @@
+@import "./mixin.scss";
+
+
+
+/*
+*  @ extend
+*/
+
+
+// !
+// * ----------------------------------- login -----------------------------------------
+// *
+.login{
+  @include box-Module(block, 1200px, 510px,  -255px 0 0 -600px, 0, #f3f5f8);
+  position: fixed; left: 50%; top: 50%;min-width: 1200px;
+  .center{
+    @include box-shadow(0, 0, 10px, rgba(153, 153, 153, 0.14));
+    margin: 0 auto 30px;background-color: #fff; width: 45%; padding: 50px 70px;
+    p{
+      @include font-adjust(18px, 24px, #676a6d, center, 100);
+      margin: 17px 0; padding: 0; letter-spacing: 4px;
+    }
+    img{
+      max-width: 100%; border: none; display: block; margin: 0 auto;
+    }
+    .input{
+      margin-bottom: 25px;
+    }
+  }
+  .footer{
+    @include font-adjust(14px, 28px, #666, center);
+  }
+}
+
+
+// !
+// * ----------------------------------- home -----------------------------------------
+// *
+.home{
+  .panel{
+    border: 1px solid #eee; margin-bottom: 20px; background-color: #fff;
+    .title{
+      @include font-adjust(18px, 24px, #003344, left);
+      border-left: 10px solid #339ace; padding-left: 10px; height: 24px; margin: 20px 0;
+    }
+  }
+
+  //统计
+  .count{
+    @include clearfix();
+    padding:0 10px 30px;
+    li{float: left; margin: 0 10px; width: calc(33.33% - 20px)}
+    p{
+      font-size: 12px; color: #999; margin-bottom: 5px;
+    }
+    .info-box{
+      @include clearfix();
+      @include transition();
+      padding: 20px 10px; line-height: 16px; font-size: 12px; color: #666; border: 1px solid #efefef;
+      &:hover{
+        background-color: #0080c2; color: #ffffff;
+        b{
+          color: #fff;
+        }
+      }
+      span{
+        float: right;width: 50%;display: block; text-align: center;
+      }
+      i{
+        font-size: 32px; display: inline-block; margin:10px 10% 0;
+      }
+      b{
+        font-size: 18px; font-weight: 100; margin-right: 5px;
+      }
+    }
+  }
+
+  //列表
+  .list{
+    padding:0 20px;
+    dl{
+      @include clearfix();
+      @include transition(all, .4s);
+      margin-bottom: 20px; line-height: 24px; font-size: 12px;padding: 5px;
+      &:hover{
+         background-color: #f8fbfe; cursor: text;
+      }
+    }
+    dt{
+      float: left;  font-size: 14px; width: calc(100% - 180px);
+      a{
+        color: #339ace;
+        &:hover{color: #f04048}
+      }
+      span{
+        @include google-text-hide(2);
+        display: block; color: #333; font-size: 13px;
+      }
+      font{color: #999}
+    }
+    dd{
+      @include text-hide();
+      float: right; color: #333; font-size: 14px; text-align: right; max-width: 180px;
+      font{color: #999; margin-right: 3px;}
+      i{
+        cursor: pointer;
+        &:hover{color: #339ace}
+      }
+    }
+  }
+
+  //分配的帐户
+  .user{padding: 0 20px 20px;}
+
+  //右边内容
+  .right{
+    padding: 0 20px 20px;
+    dl{
+      @include clearfix();
+      padding: 10px 5px; border-bottom: 1px dashed #e1e1e1; margin-bottom: 10px;
+      &:hover{
+        background-color: #fafafa;
+      }
+    }
+    dt{
+      float: left; width: 60px;height: 60px; margin-right: 10px;
+      img{
+        @include radius(1234, 50%);
+        border: none; background-color: #fff; display: block; width: 100%; height: 100%;
+        &:hover{
+          @include opacity(0.8);
+        }
+      }
+    }
+    dd{
+      float: left; width: calc(100% - 70px); font-size: 12px; line-height: 20px;
+      h4{
+        color: #333;
+      }
+      a{
+        color: #333;
+        &:hover{color: #f04048}
+      }
+      span{
+        float: right; font-weight: 100; color: #666;
+      }
+      p{
+        @include google-text-hide(4);
+        color: #666;
+      }
+      em{
+        color: #999;
+      }
+    }
+  }
+}
+
+// !
+// * ----------------------------------- account -----------------------------------------
+// *
+.account{
+
+  .info{
+    ul.card-content{
+      @include clearfix();
+      @include font-adjust(15px, 28px, #999, left);
+      min-height: 200px;
+      font{
+        color: #333;
+      }
+    }
+    li.left{
+      float: left;height: 100%; width: 320px;
+      h4{
+        font-size: 16px;margin-bottom: 20px; color: #333;
+        b{margin-right: 20px; color: #f04048}
+      }
+      span{
+        @include radius(1234, 14px);
+        @include font-adjust(12px, 22px, #888);
+        display: inline-block;  border: 1px solid #eee; padding: 0 10px; margin-left: 20px; cursor: pointer;
+        &:hover{
+          border-color: #339ace; color: #339ace;
+        }
+      }
+    }
+    li.right{
+      float: left; border-left: 1px solid #eee; padding: 20px 0 20px 10%; margin: 40px 0 0 10%;
+      em{margin-left: 10px; color: #00b4f3}
+      p{margin-bottom: 5px; }
+    }
+  }
+}
+.box-card{
+  @include box-shadow(0, 0, 0);
+  margin-bottom: 20px; padding-bottom: 20px;
+  &.noboder{border: none;}
+  img{margin-right: 25px; max-width: 60px; max-height: 60px; border: none; background-color: #f7f7f7; display: inline-block; overflow: hidden;vertical-align: top;}
+  img.big-img{margin-right: 0; max-width: 180px; max-height: 180px;}
+}
+.popup-cont{
+  padding: 20px;
+  & > div{ @include clearfix(); margin-bottom: 30px; }
+  .popup-label{float: left; margin-right: 10px; line-height: 40px;width: 82px; text-align: right}
+  .popup-enter{ display: inline-block; float: left; width: calc(100% - 100px); line-height: 40px; }
+  .popup-btn{text-align: center}
+  .upload-img{
+    padding-bottom: 20px; border-bottom: 1px solid #eee;
+    .el-upload {
+      border: 1px dashed #d9d9d9; border-radius: 6px; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 10px;
+    }
+    .avatar-uploader .el-upload:hover { border-color: #409EFF; }
+    .avatar-uploader-icon {
+      font-size: 28px; color: #bed9df; width: 110px; height: 110px; line-height: 110px; text-align: center; border: 1px dashed #d9d9d9;
+      &:hover{
+        color: #409eff; border-color: #409eff
+      }
+    }
+    .avatar { width: 110px; height: 110px; display: block; }
+    font{margin: 0 10px 0 64px; color: #333}
+    img{vertical-align: top; max-width: 110px; overflow: hidden; min-width: 110px;}
+  }
+}
+
+// !
+// * ----------------------------------- auth -----------------------------------------
+// *
+.auth{
+  .allot{
+    ul{margin-bottom: 10px;&:last-child{margin-bottom: 0}}
+    li{margin-bottom: 5px;}
+    dl{
+      @include clearfix();
+      height: 34px;line-height: 34px; text-align: left;
+      &:last-child{border-bottom: none;}
+    }
+    dt{
+      display: inline-block; width: 140px; float: left; background-color: #f8f8f8;height: 34px; padding-left: 15px;
+      &:last-child{border-bottom: none;}
+    }
+    dd{
+      text-align: left; padding: 0 20px; width: calc(100% - 140px); float: left;height: 34px;
+    }
+    .region{
+      dl{
+        height: auto; background-color: #f8f8f8;
+      }
+      dt{
+        width: 200px; height: 100%;
+      }
+      dd{
+        width: calc(100% - 200px); height: 100%; background-color: #fff; min-height:34px;
+      }
+    }
+    .box-card{padding-bottom: 0}
+  }
+  .allot-cont{
+    p{line-height: 32px; color: #666}
+    &>div{ border: 1px solid #eee; border-bottom: none;}
+  }
+}
+.popup-cont_allot{
+  padding: 20px;
+  .box{
+    margin-bottom: 20px;
+    .box-tabs{@include box-shadow(0px,0px,0px)}
+    font{display: inline-block; width: 120px; text-align: left}
+  }
+  .selected-box{
+    border: 1px solid #dcdfe6; height: 322px; overflow-y: auto;padding: 10px;
+    dl{@include clearfix();margin-bottom: 5px; }
+    dt{@include font-adjust(12px, 24px, #333, right);float: left;}
+    dd{@include clearfix();}
+    span{
+      @include font-adjust(12px, 24px, #aeaeae, left);
+      @include box-Module(block, auto, 24px, 0 5px 5px 0, 0 5px, #fff, 1px solid #ddd);
+      float: left;
+      &:hover{border-color: #f04048; color: #f04048}
+      i{ cursor: pointer; margin-left: 5px; font-size: 13px;}
+    }
+  }
+  .popover-main_va{
+    & > dt{
+      padding: 5px 10px; line-height: 25px; border-bottom: 1px solid #eee;
+      em{
+        margin-right: 7px; cursor: pointer;
+        &.on{color:#339ace}
+      }
+      span{
+        display: block; float: right; font-size: 12px; color: #666; position: relative;
+      }
+      input{
+        padding: 0 15px 0 10px; height: 24px;
+      }
+      i{
+        position: absolute; right: 5px; top: 0; font-size: 12px; cursor: pointer;
+        &:hover{
+          color: #339ace;
+        }
+      }
+    }
+    dd{
+      max-height: 245px; overflow: auto; overflow-x: hidden;
+      dl{
+        @include clearfix();
+        line-height: 28px; padding: 20px 0 10px; text-align: center; border-bottom: 1px solid #eeeeee;
+        &:last-child{border-bottom: none;}
+      }
+      dt{ float: left; width: 50px; font-size: 12px;}
+      dd{ float: left; width: calc(100% - 50px);}
+      .radio-item{
+        @include text-hide();
+        display: block; float: left; width: 25%; text-align: left;
+      }
+      .el-checkbox.on{
+        color: #339ace;
+      }
+    }
+  }
+  .popover-main_vb{
+    padding: 20px 30px 0;max-height: 215px; overflow: auto;
+    dl{margin-bottom: 20px; text-align: left}
+    dt{margin-bottom: 10px; color: #636e7b}
+    dd{@include clearfix();}
+    span{
+      @include font-adjust(14px,27px, #555);
+      display: block; float: left; margin: 0 10px 10px 0; border:1px solid #ddd; width: 130px; cursor: pointer;
+      &:hover{
+        border-color: #00b4f3; color: #339ace;
+      }
+      &.on{ background-color: #00b4f3; color: #fff; border-color: #00b4f3;}
+    }
+  }
+  .popup-btn{text-align: center}
+}
+
+
+// !
+// * ----------------------------------- article -----------------------------------------
+// *
+.article{
+
+}
+
+// !
+// * ----------------------------------- message -----------------------------------------
+// *
+.msg{
+
+}
+
+// !
+// * ----------------------------------- feedback -----------------------------------------
+// *
+.feedback{
+
+  .detail{
+    h2{
+      @include font-adjust(18px, 30px, #333, left);
+      margin-bottom: 15px;  border-bottom: 1px dashed #ddd;
+      span{margin-left: 10px; color: #666; margin-bottom: 10px; display: inline-block}
+    }
+    dl.feedback-cont{
+      padding:0 15px 15px;  margin-bottom: 15px;
+      dt{
+        margin-bottom: 10px;
+      }
+      dd{
+        color: #666; padding-left: 1em;
+        span{color: #333;line-height: 26px;}
+        p{color: #999; }
+        a{
+          color: #0080c1;
+          &:hover{color: #f04048;}
+        }
+      }
+    }
+    h4{
+      @include font-adjust(14px, 26px, #333, left);
+      border: 1px solid #eeeeee; border-bottom: none; padding: 5px 10px;
+    }
+    .handle{
+      border: 1px solid #eeeeee; padding: 20px 30px; margin-bottom: 10px;
+      .el-textarea{margin-bottom: 10px;}
+    }
+    .right{
+      padding: 20px; background-color: #fbfbfb;
+      p{font-size: 13px;  color: #999; line-height: 20px; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #ddd }
+      dl{
+        @include clearfix();
+        line-height: 30px; margin-bottom: 20px;
+      }
+      dt{
+        float: left; width: 60px; margin-right: 10px; overflow: hidden;padding-top: 5px;
+        img{width: 60px;max-height: 60px; }
+      }
+      dd{
+        float: left; color: #999; font-size: 15px;
+        font{color: #333; margin-right: 20px;}
+      }
+    }
+  }
+}
+
+
+// !
+// * ----------------------------------- shouhou -----------------------------------------
+// *
+.shouhou-upload{
+  li{
+    position: relative;
+    &.hasborder{
+      @include clearfix();
+      width: 100%; padding: 20px 15px 0; border: 1px solid #dcdfe6; margin-bottom: 20px;
+    }
+    .triangle{
+      @include regulaTriangle(top, #eee, 10px);
+      @include position(22px, null, null, 134px );
+      &:after{
+        content: '';
+        @include regulaTriangle(top, #fff, 9px);
+        @include position(-7px, null, null, -9px );
+      }
+    }
+  }
+}
+.selected-customer{
+  @include box-Module(block, 100%, 355px, -20px 0 20px 0, 0, #fff, 1px solid #eee, auto);
+  overflow-y: hidden;
+  h3{
+    @include clearfix();
+    @include font-adjust(13px, 20px, #333, left, 100);
+    padding: 10px 20px 3px; background-color: rgba(249, 249, 249, 0.61);
+    em{
+      display: inline-block;  border: 1px solid #dcdfe6; padding: 1px 6px; color: #555; margin:0 6px 6px 0;
+      &:hover{ color: #f04048; border-color: #f04048}
+    }
+    a{
+      color: #409EFF;
+      &:hover{ color: #f04048}
+    }
+    i{ cursor: pointer}
+  }
+  h4{
+    @include clearfix();
+    @include font-adjust(14px, 34px, #333, center, 100);
+    height:34px;  border-top:  1px solid #eee; border-bottom: 1px solid #eee;  padding: 0 10px;
+  }
+  font{
+    width: 34px; float: left; cursor: pointer;
+    &:hover, &.on{color: #409EFF}
+  }
+  div{overflow: auto; overflow-x: hidden; width: 100%; height: 275px; }
+  dl{
+    @include clearfix();
+    @include font-adjust(14px, 34px, #555, center, 100);
+    width: 100%; padding: 5px 30px 5px 10px;
+    &:last-child{
+      margin-bottom: 50px;
+      dd{border: none}
+    }
+  }
+  dt{
+    width: 34px; float: left;
+  }
+  dd{
+    float: left;
+    @include clearfix();
+    @include calc(100%, 34px);
+    border-bottom: 1px dotted #f6f6f6;
+    span{
+      display: block; float: left; padding:0 10px; margin-right: 10px; cursor: pointer;
+      &:hover, &.on{color: #409EFF}
+    }
+  }
+}
+.shouhou-view{
+  li{
+    @include clearfix();
+    margin-bottom: 20px; border: 1px solid #dcdfe6; padding: 30px;
+    &.fileupload{
+      .infobox{
+        @include font-adjust(13px, 1.5, #999);
+        display: inline-block; padding: 10px 30px 20px;
+        &.hasborder{border-right: 1px solid #eee}
+      }
+      b{
+        font-size: 48px; color: #0080c1; font-weight: 400;
+      }
+    }
+    &.fileinfo{
+      img{
+        display: inline-block; width: 182px; height: 224px; float: left; margin-right: 20px;
+      }
+      dl{
+        @include font-adjust(16px, 2, #333, left, 100);
+        float: left; padding-top: 4px;
+      }
+      dt{
+        font-weight: 700;
+      }
+    }
+    &.fileupload{}
+  }
+  h2{
+    @include font-adjust(16px, 1.5, #343434, left, 700); margin-bottom: 20px;
+    .cont-right{
+      float: right; font-size: 14px;font-weight: 100; cursor: pointer;color: #409EFF;
+      &:hover{color: #f04048}
+    }
+  }
+}
+.shouhou-view_dialogvb{ padding: 20px 40px;}
+//分页
+.pagination-box{text-align: center}

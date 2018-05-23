@@ -1,0 +1,129 @@
+*{margin: 0;padding: 0;list-style: none; box-sizing: border-box;-moz-box-sizing:border-box; /* Firefox */ -webkit-box-sizing:border-box; /* Safari */}
+
+/** 清除内外边距 **/
+body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, /* structural elements 结构元素 */
+dl, dt, dd, ul, ol, li, /* list elements 列表元素 */
+pre, /* text formatting elements 文本格式元素 */
+form, fieldset, legend, button, input, textarea, /* form elements 表单元素 */
+th, td /* table elements 表格元素 */ {margin: 0;padding: 0;}
+
+/** 设置默认字体 **/
+body,button, input, select, textarea /* for ie */ {font-size: 14px;font-family: 'LatoRegular', 'Lucida Grande', 'Lucida Sans Unicode', Helvetica, sans-serif !important;}
+h1, h2, h3, h4, h5, h6 { font-size: 100%; }
+address, cite, dfn, em, var, i, b, dl, dt, dd  { font-style: normal; } /* 将斜体扶正 */
+code, kbd, pre, samp { font-family: courier new, courier, monospace; } /* 统一等宽字体 */
+small { font-size: 12px; } /* 小于 12px 的中文很难阅读，让 small 正常化 */
+
+/** 重置列表元素 **/
+ul, ol { list-style: none; }
+
+/** 重置文本格式元素 **/
+a { text-decoration: none; cursor: pointer}
+
+/** 重置表单元素 **/
+legend { color: #000; } /* for ie6 */
+fieldset, img { border: 0; } /* img 搭车：让链接里的 img 无边框 */
+button, input, select, textarea { font-size: 100%; } /* 使得表单元素在 ie 下能继承字体大小 */ /* 注：optgroup 无法扶正 */
+
+/** 重置表格元素 **/
+table { border-collapse: collapse; border-spacing: 0; width: 100%; }
+
+/* 清除浮动 */
+.clear:after { content: '\20';display: block;height: 0;clear: both;}
+.clear {*zoom: 1;}
+
+
+.padding0{padding: 0!important;}
+.pdt0{padding-top: 0!important;}
+.pdl0{padding-left: 0!important;}
+.pdr0{padding-right: 0!important;}
+.pdb0{padding-bottom: 0!important;}
+.margin0{margin: 0!important;}
+.mgt0{margin-top: 0!important;}
+.mgl0{margin-left: 0!important;}
+.mgr0{margin-right: 0!important;}
+.mgb0{margin-bottom: 0!important;}
+
+/*!
+ *  主体内容  --------------------------- !!!
+ */
+body {background: #e4e7ea;font-family: 'Microsoft YaHei','微软雅黑','LatoRegular', 'Lucida Grande', 'Lucida Sans Unicode', Helvetica, sans-serif ;line-height: 21px;color: #636e7b; overflow-y: hidden}
+body.notfound, body.signin {background: #e4e7ea;}
+body .iconfont {font-size: 18px;}
+
+/*!
+ * element组件框架 样式重写
+ */
+.el-input__inner,
+.el-textarea__inner,
+.el-button{border-radius: 0!important;}
+.el-popover{padding: 0!important;}
+.el-dialog__body {*zoom: 1; padding-bottom: 10px;}
+.el-dialog__body:after { content: '\20';display: block;height: 0;clear: both;}
+.el-pagination{text-align: center}
+.el-select-dropdown__wrap{max-height: 260px!important;}
+.el-tabs--border-card>.el-tabs__content{padding: 0!important;}
+.el-pagination.is-background .btn-prev, .el-pagination.is-background .btn-next, .el-pagination.is-background .el-pager li{border-radius: 0!important;}
+.el-breadcrumb .bread-legend{ float: left; margin-right: 5px; color: #606266}
+.v-modal{opacity: 0.75!important; z-index: 99998!important;}
+.el-dialog__wrapper, .el-message-box__wrapper{z-index: 99999!important;}
+.el-notification{z-index: 2092!important;}
+.el-message{z-index: 2092!important;}
+.el-carousel__indicators{bottom: 2px!important;}
+.el-checkbox__original{display: none;}
+.el-table__fixed::before, .el-table__fixed-right::before{height: 0}
+.el-date-editor .el-range-separator{min-width: 22px}
+
+#app .el-form--label-top .el-form-item__label{padding:0 0 5px; line-height:20px;}
+#app .el-table{ margin-bottom: 20px;}
+#app .el-pagination button{ padding: 0 10px; }
+#app .el-table::before{ height: 0}
+#app .column .change-data-button {height: 20px;}
+#app .column .change-data-button:after{content: '更改'; width: 25px; height: 13px; font-size: 12px; position: absolute; top: 8px; right: -26px; line-height: 1; padding: 2px 5px; background-color: #339acd; color: #fff}
+#app .el-step.is-simple .el-step__icon{width: 22px; height: 22px; padding-bottom: 1px}
+#app .el-scrollbar__bar{z-index: 6666}
+#app .el-scrollbar__wrap{overflow-x: hidden}
+
+#app .map-tip-box{background: #fff;box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);}
+#app .map-tip-title{background: #339acd; color: #fff; padding: 10px 20px; font-size: 14px; font-weight: 100; line-height: 20px;}
+#app .map-tip-title i {display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin: 0 10px 0 40px;}
+#app .map-tip-cont{padding: 10px 20px; color: #686868}
+#app .map-tip-cont cite{color: #0080c1; font-style: normal;}
+
+.header .el-badge__content.is-fixed{top:14px; line-height: 1.3}
+.header .el-badge{ margin-right: 10px}
+
+.right-menu .el-tabs__item{padding: 0; width: 50px; text-align: center!important; height: 52px; line-height: 52px;}
+.right-menu .el-tabs--border-card>.el-tabs__header{background-color:#f2f3f5}
+.right-menu .el-tabs--left.el-tabs--border-card .el-tabs__header.is-left{border-right: none}
+.right-menu .el-tabs--left.el-tabs--border-card .el-tabs__item.is-left{border: none}
+.right-menu .el-tabs--left.el-tabs--border-card .el-tabs__item.is-left.is-active { border: none}
+.right-menu .el-tabs--border-card{height: 100%; border: none;}
+.right-menu .el-tabs--border-card>.el-tabs__header .el-tabs__item{color: #3b5997}
+.right-menu .el-tabs--border-card>.el-tabs__content{padding: 0}
+.right-menu .el-tabs--border-card,
+.right-menu .el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active{background-color: #fff}
+.right-menu .el-form-item{margin-bottom: 15px;}
+
+
+.main-panel .product .el-card__body{padding: 0}
+.main-panel .el-switch__label.is-active {color: #00b4f3}
+
+.column .el-input__inner{height:24px; line-height: 24px; border: none; cursor: pointer; padding-left: 0;}
+.column .el-input__prefix{top:0; right: 40px; left: auto; color: #333; cursor: pointer;}
+.column .el-input--prefix .el-input__inner{padding-left: 0; }
+
+.dialog-va .el-dialog__header{text-align: left; padding: 15px 20px;}
+.dialog-va .el-dialog__headerbtn{top: 15px;}
+.dialog-va .el-dialog__body{padding: 0!important;}
+.dialog-va .el-dialog__footer{padding: 15px;}
+
+.cyc-shouhou-main .el-table th {background-color: #fafafa}
+.cyc-shouhou-detail .el-checkbox__label{display: none}
+.cyc-shouhou-detail .el-checkbox__inner{margin-right: 5px;}
+
+.cyc-xl-table_dialog  .el-dialog__header{ text-align: left; }
+.cyc-xl-tooltip-box.el-popper[x-placement^="top"] .popper__arrow {border-top-color: #339acd;}
+.cyc-xl-tooltip-box.el-popper[x-placement^="bottom"] .popper__arrow{border-bottom-color: #339acd;}
+
+.BMap_shadow{display: none!important;}

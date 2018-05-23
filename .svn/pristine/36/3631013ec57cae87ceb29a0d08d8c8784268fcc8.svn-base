@@ -1,0 +1,231 @@
+<template>
+
+  <div>
+    <bi-bar columnTitle="设定车型区域">
+      <!--<template slot="button">-->
+        <!--<span class="mgr20 mgl10">时间：{{ year_month }}</span>-->
+        <!--<span class="mgr20">管理维度：{{ manage_dimession }}</span>-->
+        <!--<span class="mgr20">管理类型：{{ manage_type }}</span>-->
+      <!--</template>-->
+      <template slot="right">
+        <el-breadcrumb separator="/">
+          <span class="bread-legend">当前位置：</span>
+          <el-breadcrumb-item :to="{ path: '/' }">概览主页</el-breadcrumb-item>
+          <el-breadcrumb-item> 销量目标管理 </el-breadcrumb-item>
+        </el-breadcrumb>
+      </template>
+    </bi-bar>
+
+    <div class="content">
+
+      <el-popover
+        popper-class="cyc-xl-tooltip-box"
+        ref="popoverVa"
+        placement="bottom-end"
+        width="160"
+        trigger="click">
+        <div class="cyc-xl-tooltip">
+          <i class="iconfont icon-dianhua1"></i>请联系客户管理员
+        </div>
+      </el-popover>
+      <bi-panel :operating="false">
+        <template slot="title">
+          品牌车型
+        </template>
+        <template slot="others">
+          <span class="edit-btn" v-popover:popoverVa><i class="iconfont icon-ic_2"></i> 编辑</span>
+        </template>
+        <div class="cyc-xl-search nohover">
+          <dl>
+            <dt>品牌：</dt>
+            <dd>
+              <template v-for="(item,key) in brands">
+                <span
+                  @click="changeBrand(item.previous_level.id, item.previous_level.name)"
+                  :class="{'on': item.previous_level.id == selected_brand_id}"
+                  :key="key">
+                  {{ item.previous_level.name }}
+                </span>
+              </template>
+            </dd>
+          </dl>
+          <dl>
+            <dt>车型：</dt>
+            <dd>
+              <span v-for="(item, key) in models" :key="key">{{ item.name }}</span>
+            </dd>
+          </dl>
+        </div>
+      </bi-panel>
+
+      <el-popover
+        popper-class="cyc-xl-tooltip-box"
+        ref="popoverVb"
+        placement="top-end"
+        width="160"
+        trigger="click">
+        <div class="cyc-xl-tooltip">
+          <i class="iconfont icon-dianhua1"></i>请联系客户管理员
+        </div>
+      </el-popover>
+      <bi-panel :operating="false" >
+        <template slot="title">
+          大区
+        </template>
+        <template slot="others">
+          <span class="edit-btn" v-popover:popoverVb><i class="iconfont icon-ic_2"></i> 编辑</span>
+        </template>
+        <div class="cyc-xl-search nohover" v-loading="loading" style="min-height: 200px;">
+          <template v-if="areas.length != 0">
+            <dl v-for="(item, key) in areas" :key="key"  >
+              <dt>{{ item.previous_level.name }} :</dt>
+              <dd style="width: 70%">
+                <template v-if="item['list'].length == 0 ">
+                  <cite style="color: #999999; font-size: 13px; line-height: 27px">暂无数据</cite>
+                </template>
+                <template v-else v-for="(item2, key2) in item['list']">
+                  <span>{{ item2.name }}</span>
+                </template>
+              </dd>
+            </dl>
+          </template>
+          <div v-else-if="areas.length <= 0 && !loading">
+            <bi-empty>
+              <template slot="tips">&nbsp</template>
+            </bi-empty>
+          </div>
+        </div>
+
+      </bi-panel>
+
+      <el-popover
+        popper-class="cyc-xl-tooltip-box"
+        ref="popoverVc"
+        placement="top-end"
+        width="160"
+        trigger="click">
+        <div class="cyc-xl-tooltip">
+          <i class="iconfont icon-dianhua1"></i>请联系客户管理员
+        </div>
+      </el-popover>
+      <bi-panel :operating="false">
+        <template slot="title">
+          预警
+        </template>
+        <template slot="others">
+          <span class="edit-btn" v-popover:popoverVc><i class="iconfont icon-ic_2"></i> 编辑</span>
+        </template>
+        <div class="cyc-xl-search nohover">
+          <dl>
+            <dt>一级预警</dt>
+            <dd><font class="red"><em> 0% &lt;= YTD完成率 &lt; 80%</em> 红色：差</font></dd>
+          </dl>
+          <dl>
+            <dt>二级预警</dt>
+            <dd><font class="orange"><em>80% &lt;= YTD完成率 &lt; 100%</em> 橙色：正常</font></dd>
+          </dl>
+          <dl>
+            <dt>三级预警</dt>
+            <dd><font class="greed"><em>YTD完成率 >= 100%</em> 绿色：优</font></dd>
+          </dl>
+        </div>
+      </bi-panel>
+
+      <router-link to="target" class="cyc-xl-btn">我知道了</router-link>
+    </div>
+  </div>
+
+</template>
+
+<script type="text/ecmascript-6">
+  import BiBar from '@index/components/bar.vue'
+  import BiPanel from '@index/components/panel.vue'
+  import mixin from '@index/config/mixin'
+  import BiEmpty from '@index/components/empty.vue'
+  import sales from './_mixin'
+
+  export default {
+    name: '',
+    mixins: [mixin, sales],
+    data() {
+      return {
+        loading: true,
+        brands: [],
+        models: [],
+        areas:[],
+        allAreas: [],
+        regions: [],
+        selected_brand_id:''
+      }
+    },
+    mounted() {
+      this.GET_SUB_MODEL()
+    },
+    methods: {
+      GET_SUB_MODEL() {
+        this.$request.get(this.$interface.GET_SUB_MODEL, {
+          header: {token: this.token}
+        }, (response) => {
+          let allBrands = response.data || []
+          this.brands = allBrands.filter( item => {
+            if (item.previous_level.id == 15){
+              return item
+            }
+          })
+          this.models = ''
+          this.GET_REGION()
+        }, this.failure)
+      },
+      GET_REGION() {
+        this.loading = true
+        this.$request.get(this.$interface.GET_REGION, {
+          header: {token: this.token}
+        }, (response) => {
+          this.loading = false
+          this.allAreas = response.data || []
+          this.initData()
+        }, this.failure)
+      },
+      filtersArea (selected_brand_name){
+        this.areas = []
+        for (let item in this.allAreas){
+          let isTrue = this.allAreas[item]['previous_level']['name'].indexOf(selected_brand_name) > -1
+          if (isTrue){
+            this.areas.push(this.allAreas[item])
+          }
+        }
+      },
+      filtersModel (selected_brand_id) {
+        this.models = []
+        this.brands.every((val) => {
+          if (val.previous_level.id == selected_brand_id) {
+            this.models = val.list
+            return false
+          }
+          return true
+        })
+      },
+      changeBrand(brand_id, brand_name){
+        this.selected_brand_id = brand_id
+        this.filtersArea(brand_name)
+        this.filtersModel(brand_id)
+      },
+      initData () {
+        let defaultBrand = this.brands[0]
+        this.selected_brand_id = defaultBrand['previous_level']['id']
+        this.models = defaultBrand['list']
+        this.filtersArea(defaultBrand['previous_level']['name'])
+        this.filtersModel(defaultBrand['previous_level']['id'])
+      }
+    },
+    components:{
+      BiBar,
+      BiPanel,
+      BiEmpty
+    }
+  }
+</script>
+
+<style lang="scss" type="text/scss" scoped>
+
+</style>

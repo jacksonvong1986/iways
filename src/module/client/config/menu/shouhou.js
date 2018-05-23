@@ -1,0 +1,88 @@
+export default [{
+  id: '18',
+  title: '售后概况',
+  icon: 'icon-calendar',
+  url: '/zhiku/sh'
+}, {
+  id: '19',
+  title: '配件比较',
+  icon: 'icon-taoxiaopu',
+  url: '/zhiku/sh/pjbj',
+  status: true,
+  sub: [{
+    id: '20',
+    title: '配件价格查询',
+    icon: 'icon-dingzhiye_guowaijiage',
+    url: '/zhiku/sh/pjjgcx'
+  }, {
+    id: '21',
+    title: '配件价格累加比较',
+    icon: 'icon-refund',
+    url: '/zhiku/sh/pjjgbj'
+  }, {
+    id: '21',
+    title: '配件价格与整车价格比较',
+    icon: 'icon-che',
+    url: '/zhiku/sh/pjjgyzcjgbj'
+  }, {
+    id: '21',
+    title: '配件价格偏离率比较',
+    icon: 'icon-et-workshop-inventory',
+    url: '/zhiku/sh/pjjgpllbj'
+  }, {
+    id: '21',
+    title: '配件价格偏离值比较',
+    icon: 'icon-caiwufenxi',
+    url: '/zhiku/sh/pjjgplzbj'
+  }, {
+    id: '21',
+    title: '配件价格差异分析',
+    icon: 'icon-caiwufenxi',
+    url: '/zhiku/sh/pjjgcyfx'
+  },]
+}, {
+  id: '22',
+  title: '用车比较',
+  icon: 'icon-caiwufenxi',
+  url: '/zhiku/sh/ycbj',
+  status: true,
+  sub: [{
+    id: '23',
+    title: '工时价格查询',
+    icon: 'icon-caiwufenxi',
+    url: '/zhiku/sh/gsjgcx'
+  }, {
+    id: '24',
+    title: '工时价格比较',
+    icon: 'icon-caiwufenxi',
+    url: '/zhiku/sh/gsjgbj'
+  }, {
+    id: '24',
+    title: '用车成本查询',
+    icon: 'icon-caiwufenxi',
+    url: '/zhiku/sh/yccbcx'
+  }, {
+    id: '24',
+    title: '用车成本比较',
+    icon: 'icon-caiwufenxi',
+    url: '/zhiku/sh/yccbbj'
+  },]
+}, {
+  id: '25',
+  title: '下载功能',
+  icon: 'icon-caiwufenxi',
+  url: '/zhiku/sh/xz',
+  status: true,
+  sub: [{
+    id: '26',
+    title: '数据下载',
+    icon: 'icon-caiwufenxi',
+    url: '/zhiku/sh/xz/sj'
+  },
+   {
+    id: '27',
+    title: '报告下载',
+    icon: 'icon-caiwufenxi',
+    url: '/zhiku/sh/xz/bg'
+  }]
+},]

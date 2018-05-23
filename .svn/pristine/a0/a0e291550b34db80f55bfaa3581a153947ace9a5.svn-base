@@ -1,0 +1,81 @@
+@import "./mixin.scss";
+
+// !
+// * -----------------------------------公用样式组件-----------------------------------------
+// *
+
+// 公共字体颜色 */
+.font-green{color:#669900;  }
+.font-red {color:#f04048;}
+.font-black{color: #333}
+.font-gray {color: #666}
+.font-pink{color: #fb6b72}
+.font-blue{color:#0080c1;}
+.font-blue-b {color:#4c8a95}
+.font-blue-c {color:#329ad1}
+.font-blue-d {color:#409EFF}
+
+.font-ban{color: #d5d5d5}
+.font-allow{color: #090}
+
+
+// !
+// * -----------------------------------页面主体-----------------------------------------
+// *
+.panel{
+  padding: 20px; background-color: #fff;
+  h1{
+    @include clearfix();
+    padding: 5px 0 10px 20px; line-height: 40px; font-size: 20px; color: #003344; margin-bottom: 20px; border-bottom: 1px solid #eee; position: relative;
+    &:before{
+      content: ""; position: absolute; height: 22px; width: 8px; background-color: #00b3f2; top: 12px; left: 0;
+    }
+    span{
+      float: right;
+    }
+  }
+  .search{
+    @include clearfix();
+    margin-bottom: 20px;
+    & > span, .form-label{
+      display: block; float: left; line-height: 26px; margin-right: 15px;width: 20%; min-width: 96px;
+      &.nofloat{display: block; float: none}
+    }
+  }
+  .result{
+    border: 1px solid #eee; border-bottom: none; margin-bottom: 20px;
+  }
+}
+
+
+// 弹出层车型选择器
+.popover-va{
+  $height: 318px;
+  @include clearfix();
+  position: relative; max-height: $height; overflow: hidden;background-color: #fff;
+  dt{
+    @include position(0, null, 0, 0);
+    width: 40px; float: left;border-right: 1px solid #d9d9d9;background-color: #f9f9f9;padding: 8px 0;text-align: center;
+    em{
+      @include font-adjust(13px, 18px, #666, center);
+      display: block; width: 18px; height: 18px;  margin: 2px auto; border-radius: 2px; cursor: pointer;
+      &:hover{
+        background-color: #f04048; color: #fff;
+      }
+    }
+  }
+  dd{
+    float: left; height: $height; width: 210px; overflow-y: auto; overflow-x: hidden; padding: 0 0 5px 40px;
+  }
+  ul{
+    border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px;
+  }
+  li{
+    @include font-adjust(14px, 32px, #333, left);
+    cursor: pointer;padding: 0 10px; height: 32px;
+    &:hover{
+      background-color: #f2f2f2;
+    }
+  }
+}
+

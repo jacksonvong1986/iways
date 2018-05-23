@@ -1,0 +1,59 @@
+// 清除浮动 */
+.clear:after { content: '\20';display: block;height: 0;clear: both;}
+.clear {*zoom: 1;}
+
+// 间距重置 */
+.padding0{padding: 0!important;}
+.pdt0{padding-top: 0!important;}
+.pdl0{padding-left: 0!important;}
+.pdr0{padding-right: 0!important;}
+.pdb0{padding-bottom: 0!important;}
+.margin0{margin: 0!important;}
+.mgt0{margin-top: 0!important;}
+.mgl0{margin-left: 0!important;}
+.mgr0{margin-right: 0!important;}
+.mgb0{margin-bottom: 0!important;}
+
+//字体颜色 */
+.font-green{color:#669900;}
+.font-red {color:#f04048;}
+.font-black{color: #333}
+.font-gray {color: #666}
+.font-pink{color: #fb6b72}
+.font-blue{color:#0080c1;}
+.font-blue-b {color:#4c8a95}
+.font-blue-c {color:#329ad1}
+
+
+.icon-down{color: #f04048}
+.icon-up{color: #669900}
+.icon-triangledownfill{color: #f04048;font-size: 12px;}
+.icon-triangleupfill{color: #669900;font-size: 12px;}
+.icon-chexian{font-size:12px;}
+
+/*  公用样式 */
+
+//搜索框
+.search-class_va{
+  @include clearfix();
+  @include font-adjust(14px, 32px, #777, left);
+  display: inline-block; padding: 7px 0;
+  input{
+    display: inline-block; margin-right: -1px; padding: 10px; width: 216px; height: 32px; border:1px solid #eee; float: left;
+  }
+  .commit, font{
+    float: left; cursor: pointer;
+    @include button(70px, 32px, #006599);
+  }
+}
+
+//按钮样式
+
+//朴素按钮
+.btn-plain{
+  @include box-Module(inline-block, auto, 30px, 0 10px 0 0, 0 15px, #fafafa, 1px solid #dcdcdc);
+  cursor: pointer; line-height: 28px; text-align: center;
+  &:hover{ color: #339acd; border-color: #339acd; background-color: rgba(51, 154, 205, 0.11)}
+  &.on{background-color: #339acd; color: #fff; border-color: #339acd}
+}
+
