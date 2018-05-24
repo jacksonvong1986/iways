@@ -9,7 +9,7 @@ var port = 80;
 app.use(express.static(path.resolve(__dirname, './dist')))
 
 const apiPolicyProxy = proxy('/policy', { 
-  target: 'http://i.ways.cn/api/policy',
+  target: '/api/policy',
   changeOrigin: true,
   pathRewrite: function (path, req) { 
    return /\/buildFile\//ig.test(path) ? `/policy/buildFile?${path.split('?')[1]}` : path
@@ -17,10 +17,10 @@ const apiPolicyProxy = proxy('/policy', {
 });
 app.use('/policy/*', apiPolicyProxy);
 
-const apiProxy = proxy('/api', { target: 'http://i.ways.cn',changeOrigin: true });
+const apiProxy = proxy('/api', { target: '',changeOrigin: true });
 app.use('/api/*', apiProxy);
 
-const ajaxProxy = proxy('/ajax', { target: 'http://dss.ways.cn',changeOrigin: true });
+const ajaxProxy = proxy('/ajax', { target: '',changeOrigin: true });
 app.use('/ajax/*', ajaxProxy);
 
 app.get('*', function(req, res) {
