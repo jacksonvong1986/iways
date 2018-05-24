@@ -12,14 +12,14 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
         '/api': {
-            target: 'http://i.ways.cn/api',
+            target: '',
             changeOrigin: true,
             pathRewrite: {
                 '^/api': ''
             }
         },
         '/ajax': {
-            target: 'http://dss.ways.cn/ajax',
+            target: '',
             changeOrigin: true,
             pathRewrite: {
                 '^/ajax': ''
