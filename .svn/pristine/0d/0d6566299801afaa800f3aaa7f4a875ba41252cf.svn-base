@@ -1,0 +1,402 @@
+<template>
+
+  <div style="min-height: 400px">
+    <bi-bar columnTitle="目标列表">
+      <template slot="button">
+        <span class="mgr20 mgl10">时间：{{ year_month }}</span>
+        <span class="mgr20 cyc-xl-column">
+          管理维度：{{ dimension_name }}
+          <el-cascader
+            v-if="manage_type_id==1"
+            size="mini"
+            class="change-data-button"
+            popper-class="cyc-xl-column_cascader"
+            :options="options"
+            @change="selectOptions"
+            v-model="selectedOptions">
+          </el-cascader> 
+        </span>
+        <span class="mgr20">管理类型：{{ manage_type }}</span>
+      </template>
+      <template slot="right">
+        <el-breadcrumb separator="/">
+          <span class="bread-legend">当前位置：</span>
+          <el-breadcrumb-item :to="{ path: '/' }">概览主页</el-breadcrumb-item>
+          <el-breadcrumb-item> 销量目标管理</el-breadcrumb-item>
+          <el-breadcrumb-item> 省份 - 目标列表</el-breadcrumb-item>
+        </el-breadcrumb>
+      </template>
+    </bi-bar>
+
+    <div class="content">
+      <bi-panel :operating="false" v-if="false">
+        <template slot="title">
+          默认车型
+        </template>
+        <template slot="others">
+          <el-input
+            placeholder="请输入内容"
+            style="width: 220px; float: left"
+            size="mini"
+            clearable>
+          </el-input>
+          <span class="btn-primary">搜索</span>
+        </template>
+        <div class="cyc-xl-search">
+          <div class="panel-selected_vb">
+            已选条件：
+            <span> 上汽通用 <i>x</i></span>
+            <span> 雪佛兰 <i>x</i></span>
+            <font>重置条件</font>
+          </div>
+          <dl>
+            <dt>品牌</dt>
+            <dd>
+              <span class="on">别克</span>
+            </dd>
+          </dl>
+          <dl>
+            <dt>车型</dt>
+            <dd>
+              <span class="on">昂科雷</span>
+              <span >昂科雷</span>
+              <span >昂科雷</span>
+            </dd>
+          </dl>
+        </div>
+      </bi-panel>
+
+      <div class="cyc-xl-table-box">
+        <table class="cyc-xl-table_vc">
+          <thead>
+            <tr>
+              <th>序号</th>
+              <th>流水号</th>
+              <th>标题</th>
+              <th>管理类型</th>
+              <th>区域</th>
+              <th>目标制定人</th>
+              <th>制定日期</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody v-loading="loading[0]" v-if="target_list.length">
+            <tr v-for="(item, key) in target_list">
+              <td>
+                {{ (page - 1) * page_size + key + 1}}
+              </td>
+              <td>
+                <a :href="'/client.html#/zhiku/xl/province/target/detail?serial_number=' + item.serial_number" target="_blank">
+                {{ item.serial_number }}
+                </a>
+              </td>
+              <td>
+                <a :href="'/client.html#/zhiku/xl/province/target/detail?serial_number=' + item.serial_number" target="_blank">
+                {{ item.name }}
+                </a>
+              </td>
+              <td>{{ item.manage_type.name || '零售量' }}</td>
+              <td>{{ item.region.name }}</td>
+              <td><span v-if="item.author">{{ item.author.username || '' }} {{ item.author.role_name || '' }}</span></td>
+              <td>{{ item.create_time }}</td>
+              <td><a :href="'/client.html#/zhiku/xl/province/target/detail?serial_number=' + item.serial_number" target="_blank">查看</a></td>
+            </tr>
+          </tbody>
+          <tbody v-else-if="complete[0]">
+            <tr>
+              <td colspan="8">
+                <bi-empty style="margin: 20px auto"><span slot="tips"></span></bi-empty>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination-box" v-if="target_list.length">
+          <span style="float: left">
+            显示行数：
+              <el-select v-model="page_size" placeholder="请选择"  size="mini" style="width: 100px" @change="handleSizeChange">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+          </span>
+          <el-pagination
+            style="float: right"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page.sync="page"
+            :page-size="page_size"
+            layout="prev, pager, next, jumper"
+            :total="total">
+          </el-pagination>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</template>
+
+<script type="text/ecmascript-6">
+  import BiBar from '@index/components/bar.vue'
+  import BiPanel from '@index/components/panel.vue'
+  import BiEmpty from '@index/components/empty.vue'
+  import mixin from '@index/config/mixin'
+  import sales from './_mixin'
+
+  export default {
+    name: '',
+    mixins: [mixin, sales],
+    data() {
+      return {
+        openSecondaryVa: false,
+        openSecondaryVb: false,
+        currentPage: 1,
+        options: [{
+          value: 10,
+          label: '10行/页'
+        }, {
+          value: 20,
+          label: '20行/页'
+        }, {
+          value: 30,
+          label: '30行/页'
+        }, {
+          value: 40,
+          label: '40行/页'
+        }, {
+          value: 50,
+          label: '50行/页'
+        }],
+        brands: [],
+        models: [],
+        regions: [],
+        allRegions: [],
+        selected_brand_id: '',
+        selected_model_id: [],
+        selected_region_id: [],
+        selected_brand:{},
+        selected_group: {},
+        serial_number: '',//流水号
+        target_list: [],
+        page_size: 10,
+        page: 1,
+        total: 0,
+        region_id: '',
+        province_id: '',
+        options: [],
+        selectedOptions: [],
+        loading: new Array(3).fill(false),
+        complete: new Array(3).fill(false),
+      }
+    },
+    mounted(){
+      this.region_id = this.dimension_id.split('@')[0] || ''
+      this.province_id = this.dimension_id.split('@')[1] || ''
+      this.brand_id = 15
+      this.brand_name = '别克'
+      this.GET_REGION()
+      this.GET_TARGET_LOG_PAGE()
+      this.GET_NEWST_TARGET(() => {
+        this.GET_SUB_MODEL()
+      })
+    },
+    watch:{
+      selected_brand() {
+      },
+      selected_group(){
+        this.GET_TARGET_LOG_PAGE({
+          brand_id:this.selected_group.brand,
+          sub_model_id:this.selected_group.model,
+        })
+      },
+      regions() {
+        //区域选择
+        if (this.manage_type_id == 1) {
+          let options = this.groupByBrandName(this.regions, 'province')
+          this.options = options[1]['children']
+        }
+      },
+    },
+    computed: {
+      region_name() {
+        let region = this.regions.find( item => {
+          return item.previous_level.id == this.region_id
+        })
+        return region.previous_level.name
+      },
+      province_name() {
+        let region = this.regions.find( item => {
+          return item.previous_level.id == this.region_id
+        })
+        let provinces = !!region && !!region.list ? region.list : []
+        let province_name = provinces.find( item => {
+          return item.id == this.province_id
+        }).name || ''
+        return province_name
+      },
+      pronvince_name_map() {
+        let region = this.regions.find( item => {
+          return item.previous_level.id == this.region_id
+        })
+        let provinces = !!region && !!region.list ? region.list : []
+        let province_name = provinces.find( item => {
+          return item.id == this.province_id
+        }).name || ''
+        // let province_name = this.province_name
+        let name = ''
+        , province_map = this.province_map
+        for (let key in province_map) {
+          let values = province_map[key]
+          if (values.includes(province_name)) {
+            name = key
+          }
+        }
+        return name
+      },
+    },
+    methods: {
+      selectOptions() {
+        this.region_id = this.selectedOptions[0]
+        this.province_id = this.selectedOptions[1]
+        this.dimension_id = this.region_id + '@' + this.province_id
+        this.dimension_name = this.province_name
+        this.updateDimension(this.dimension_id, this.dimension_name)
+
+        this.GET_TARGET_LOG_PAGE()
+        this.GET_NEWST_TARGET(() => {
+          this.GET_SUB_MODEL()
+        })
+      },
+      handleSizeChange() {
+        this.page = 1
+        this.GET_TARGET_LOG_PAGE()
+      },
+      handleCurrentChange(val) {
+        this.page = val
+        this.GET_TARGET_LOG_PAGE()
+      },
+      changeBrand (brand_id = '', brand_name = '') {
+        this.selected_brand = {id: brand_id, name: brand_name}
+        this.selected_brand_id = brand_id
+        this.selected_model_id = []
+        this.selected_region_id = []
+        if (brand_id === '') {
+          this.models = this.brands[0]['list']
+        }else{
+          this.brands.map((item,i) =>{
+            if (item.previous_level.id == brand_id) {
+              this.models = item.list
+            }
+          })
+        }
+        this.selectedConditions()
+      },
+      changeModel (model_id = '', model_name) {
+        if (model_id == '') {
+          this.selected_model_id = []
+          this.selected_model_all = []
+          for (let item in this.models) {
+            this.selected_model_all.push(this.models[item]['id'])
+          }
+        }else{
+          let index = this.selected_model_id.indexOf(model_id)
+          index > -1 ? this.selected_model_id.splice(index, 1) : this.selected_model_id.push(model_id)
+          this.selected_model_all = this.selected_model_id
+        }
+        this.selectedConditions()
+      },
+      changeRegion (region_id = '') {
+        if (region_id == '') {
+          this.selected_region_id = []
+          this.selected_region_all = []
+          for (let item in this.regions) {
+            this.selected_region_all.push(this.regions[item]['previous_level']['id'])
+          }
+        }else{
+          let index = this.selected_region_id.indexOf(region_id)
+          index > -1 ? this.selected_region_id.splice(index, 1) : this.selected_region_id.push(region_id)
+          this.selected_region_all = this.selected_region_id
+        }
+        this.selectedConditions()
+      },
+      selectedConditions () {
+        this.selected_group = {
+          brand:this.selected_brand_id,
+          model:this.selected_model_id,
+        }
+      },
+      search(){
+        this.GET_TARGET_LOG_PAGE({
+          brand_id:this.selected_group.brand,
+          sub_model_id:this.selected_group.model,
+          serial_number:this.serial_number,
+        })
+      },
+      GET_TARGET_LOG_PAGE(params={}) {
+        this.loading[0] = true
+        this.$request.get(this.$interface.GET_TARGET_LOG_PAGE, {
+          header: {token: this.token},
+          manage_dimension: 'PROVINCE',
+          dimension_id: this.province_id,
+          brand_id: params.brand_id || '',
+          sub_model_id: params.sub_model_id || '',
+          serial_number: params.serial_number || '',
+          page: this.page,
+          rows: this.page_size,
+        }, (response) => {
+          let data = response.data[0]
+          this.target_list = data.list || []
+          this.total = data.total
+          this.loading[0] = false
+          this.complete[0] = true
+        }, this.failure)
+      },
+      GET_SUB_MODEL () {
+        this.$request.get(this.$interface.GET_SUB_MODEL, {
+          header: {token: this.token},
+        }, (response) => {
+          this.brands = response.data || []
+          this.models = this.brands[0]['list']
+          this.selected_brand = {
+            id : this.brands[0]['previous_level']['id'],
+            name : this.brands[0]['previous_level']['name']
+          }
+        }, this.failure)
+      },
+      GET_REGION() {
+        this.$request.get(this.$interface.GET_REGION, {
+          header: {token: this.token},
+        }, (response) => {
+          let data = response.data
+          this.regions = data || []
+          let that = this
+        }, this.failure)
+      },
+      GET_NEWST_TARGET(callback=()=>{}) {
+        this.$request.get(this.$interface.GET_NEWST_TARGET, {
+          header: {token: this.token},
+          manage_dimension: 'REGION',
+          region_id: this.region_id
+        }, (response) => {
+          let data = response.data[0] || {}
+          this.serial_number = data.serial_number || ''
+          if (!this.serial_number) return
+          typeof callback == 'function' ? callback() : ''
+        }, this.failure)
+      }
+    },
+    components:{
+      BiBar,
+      BiPanel,
+      BiEmpty
+    }
+  }
+</script>
+
+<style lang="scss" type="text/scss" scoped>
+
+</style>

@@ -1,0 +1,312 @@
+<template>
+
+  <div>
+    <bi-bar columnTitle="目标列表">
+      <template slot="button">
+        <span class="mgr20 mgl10">时间：{{ year_month }}</span>
+        <span class="mgr20">管理维度：{{ dimension_name }}</span>
+        <span class="mgr20">管理类型：{{ manage_type }}</span>
+      </template>
+      <template slot="right">
+        <el-breadcrumb separator="/">
+          <span class="bread-legend">当前位置：</span>
+          <el-breadcrumb-item :to="{ path: '/' }">概览主页</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/zhiku/xl' }"> 销量目标管理</el-breadcrumb-item>
+          <el-breadcrumb-item> 区域 - 目标列表</el-breadcrumb-item>
+        </el-breadcrumb>
+      </template>
+    </bi-bar>
+
+    <div class="content">
+      <bi-panel :operating="false" v-if="false">
+        <template slot="title">
+          默认车型
+        </template>
+        <template slot="others">
+          <el-input
+            placeholder="请输入内容"
+            style="width: 220px; float: left"
+            size="mini"
+            clearable>
+          </el-input>
+          <span class="btn-primary">搜索</span>
+        </template>
+        <div class="cyc-xl-search">
+          <dl>
+            <dt>品牌</dt>
+            <dd>
+              <span class="on">别克</span>
+            </dd>
+          </dl>
+          <dl>
+            <dt>车型</dt>
+            <dd>
+              <span class="on">昂科雷</span>
+              <span >昂科雷</span>
+              <span >昂科雷</span>
+            </dd>
+          </dl>
+        </div>
+      </bi-panel>
+      <div v-loading="loading" style="min-height: 200px;">
+        <div class="cyc-xl-table-box" v-if="target_list.length > 0">
+          <table class="cyc-xl-table_vc">
+            <thead>
+            <tr>
+              <th>序号</th>
+              <th>流水号</th>
+              <th>标题</th>
+              <th>管理类型</th>
+              <th>区域</th>
+              <th>目标制定人</th>
+              <th>制定日期</th>
+              <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(item, key) in target_list">
+              <td>{{ (page - 1) * page_size + key + 1}}</td>
+              <td>
+                <a :href="'/client.html#/zhiku/xl/area/target/detail?serial_number=' + item.serial_number" target="_blank">
+                {{ item.serial_number }}
+                </a>
+              </td>
+              <td>
+                <a :href="'/client.html#/zhiku/xl/area/target/detail?serial_number=' + item.serial_number" target="_blank">
+                {{ item.name }}
+                </a>
+              </td>
+              <td>{{ item.manage_type.name || '零售量' }}</td>
+              <td>{{ item.region.name }}</td>
+              <td><span v-if="item.author">{{ item.author.username || '' }} {{ item.author.role_name || '' }}</span></td>
+              <td>{{ item.create_time }}</td>
+              <td><a :href="'/client.html#/zhiku/xl/area/target/detail?serial_number=' + item.serial_number" target="_blank">查看</a></td>
+            </tr>
+            </tbody>
+          </table>
+          <div class="pagination-box">
+          <span style="float: left">
+            显示行数：
+              <el-select v-model="page_size" placeholder="请选择"  size="mini" style="width: 100px" @change="handleSizeChange">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+          </span>
+            <el-pagination
+              style="float: right"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page.sync="page"
+              :page-size="page_size"
+              layout="prev, pager, next, jumper"
+              :total="total">
+            </el-pagination>
+          </div>
+        </div>
+        <bi-empty v-else-if="target_list.length <= 0&&!loading" style="background: #fff; padding: 200px auto">
+          <span slot="tips"> </span>
+        </bi-empty>
+      </div>
+
+    </div>
+  </div>
+
+</template>
+
+<script type="text/ecmascript-6">
+  import BiBar from '@index/components/bar.vue'
+  import BiPanel from '@index/components/panel.vue'
+  import BiEmpty from '@index/components/empty.vue'
+  import mixin from '@index/config/mixin'
+  import sales from './_mixin'
+
+  export default {
+    name: '',
+    mixins: [mixin, sales],
+    data() {
+      return {
+        openSecondaryVa: false,
+        openSecondaryVb: false,
+        currentPage: 1,
+        options: [{
+          value: 10,
+          label: '10行/页'
+        }, {
+          value: 20,
+          label: '20行/页'
+        }, {
+          value: 30,
+          label: '30行/页'
+        }, {
+          value: 40,
+          label: '40行/页'
+        }, {
+          value: 50,
+          label: '50行/页'
+        }],
+        brands: [],
+        models: [],
+        regions: [],
+        allRegions: [],
+        selected_brand_id: '',
+        selected_model_id: [],
+        selected_region_id: [],
+        selected_brand:{},
+        selected_group: {},
+        serial_number: '',//流水号
+        target_list: [],
+        page_size: 10,
+        page: 1,
+        total: 0,
+        loading: true,
+      }
+    },
+    mounted(){
+      this.getToken(() => {
+        this.GET_TARGET_LOG_PAGE()
+        this.GET_SUBMODEL()
+      })
+    },
+    watch:{
+      selected_brand() {
+        this.filtersRegion()
+      },
+      selected_group(){
+        this.GET_TARGET_LOG_PAGE({
+          brand_id:this.selected_group.brand,
+          sub_model_id:this.selected_group.model,
+          region_id:this.selected_group.region,
+        })
+      }
+    },
+    methods: {
+      handleSizeChange() {
+        this.page = 1
+        this.GET_TARGET_LOG_PAGE()
+      },
+      handleCurrentChange(val) {
+        this.page = val
+        this.GET_TARGET_LOG_PAGE()
+      },
+      changeBrand (brand_id = '', brand_name = '') {
+        this.selected_brand = {id: brand_id, name: brand_name}
+        this.selected_brand_id = brand_id
+        this.selected_model_id = []
+        this.selected_region_id = []
+        if (brand_id === '') {
+          this.models = this.brands[0]['list']
+        }else{
+          this.brands.map((item,i) =>{
+            if (item.previous_level.id == brand_id) {
+              this.models = item.list
+            }
+          })
+        }
+        this.selectedConditions()
+      },
+      changeModel (model_id = '', model_name) {
+        if (model_id == '') {
+          this.selected_model_id = []
+          this.selected_model_all = []
+          for (let item in this.models) {
+            this.selected_model_all.push(this.models[item]['id'])
+          }
+        }else{
+          let index = this.selected_model_id.indexOf(model_id)
+          index > -1 ? this.selected_model_id.splice(index, 1) : this.selected_model_id.push(model_id)
+          this.selected_model_all = this.selected_model_id
+        }
+        this.selectedConditions()
+      },
+      changeRegion (region_id = '') {
+        if (region_id == '') {
+          this.selected_region_id = []
+          this.selected_region_all = []
+          for (let item in this.regions) {
+            this.selected_region_all.push(this.regions[item]['previous_level']['id'])
+          }
+        }else{
+          let index = this.selected_region_id.indexOf(region_id)
+          index > -1 ? this.selected_region_id.splice(index, 1) : this.selected_region_id.push(region_id)
+          this.selected_region_all = this.selected_region_id
+        }
+        this.selectedConditions()
+      },
+      selectedConditions () {
+        this.selected_group = {
+          brand:this.selected_brand_id,
+          model:this.selected_model_id,
+          region:this.selected_region_id,
+        }
+      },
+      filtersRegion(selected_brand_name = this.selected_brand['name']){
+        this.regions = []
+        for (let item in this.allRegions){
+          let isTrue = this.allRegions[item]['previous_level']['name'].indexOf(selected_brand_name) > -1
+          if (isTrue){
+            this.regions.push(this.allRegions[item])
+          }
+        }
+      },
+      search(){
+        this.GET_TARGET_LOG_PAGE({
+          brand_id:this.selected_group.brand,
+          sub_model_id:this.selected_group.model,
+          region_id:this.selected_group.region,
+          serial_number:this.serial_number,
+        })
+      },
+      GET_TARGET_LOG_PAGE(params={}) {
+        this.loading = true
+        this.$request.get(this.$interface.GET_TARGET_LOG_PAGE, {
+          header: {token: this.token},
+          manage_dimension: 'REGION',
+          brand_id: params.brand_id || '',
+          sub_model_id: params.sub_model_id || '',
+          region_id: params.region_id || '',
+          serial_number: params.serial_number || '',
+          page: this.page,
+          rows: this.page_size,
+        }, (response) => {
+          this.loading = false
+          let data = response.data[0]
+          this.target_list = data.list || []
+          this.total = data.total
+        }, this.failure)
+      },
+      GET_SUBMODEL () {
+        this.$request.get(this.$interface.GET_SUB_MODEL, {
+          header: {token: this.token},
+        }, (response) => {
+          this.brands = response.data || []
+          this.models = this.brands[0]['list']
+          this.selected_brand = {
+            id : this.brands[0]['previous_level']['id'],
+            name : this.brands[0]['previous_level']['name']
+          }
+        }, this.failure)
+      },
+      GET_REGION() {
+        this.$request.get(this.$interface.GET_REGION, {
+          header: {token: this.token}
+        }, (response) => {
+          this.allRegions = response.data || []
+          this.filtersRegion()
+        }, this.failure)
+      },
+    },
+    components:{
+      BiBar,
+      BiPanel,
+      BiEmpty
+    }
+  }
+</script>
+
+<style lang="scss" type="text/scss" scoped>
+
+</style>

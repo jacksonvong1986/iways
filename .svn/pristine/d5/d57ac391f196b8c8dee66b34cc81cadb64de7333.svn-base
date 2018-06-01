@@ -1,0 +1,10 @@
+<!DOCTYPE html><html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>威尔森智能决策平台</title>
+  <link href="/static/css/index.6f3292f34d3da767a7357f8d4a03e900.css" rel="stylesheet"></head>
+  <body>
+    <div id="app"><div class="view"><iframe id="auth-login-iframe" name="auth-login-iframe" src="http://dss.ways.cn/ajax/auth/oos_login.html" style="width: 100%; height: 748px;"></iframe></div></div>
+  <script type="text/javascript" src="/static/js/manifest.13d5d2a920afd08ec9a0.js"></script><script type="text/javascript" src="/static/js/vendor.fb2c9b1c7510bb40c32c.js"></script><script type="text/javascript" src="/static/js/index.0be6fc5dbbef43882cc2.js"></script>
+
+</body></html>

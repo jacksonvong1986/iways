@@ -1,0 +1,779 @@
+<template>
+	<div style="min-height: 300px">
+    <bi-bar columnTitle="概况">
+      <template slot="button">
+        <span class="mgr20 mgl10">时间：{{ year_month }}</span>
+        <span class="mgr20">管理维度：{{ dimension_name }}</span>
+        <span class="mgr20">管理类型：{{ manage_type }}</span>
+      </template>
+      <template slot="right">
+        <el-breadcrumb separator="/">
+          <span class="bread-legend">当前位置：</span>
+          <el-breadcrumb-item :to="{ path: '/' }">概览主页</el-breadcrumb-item>
+          <el-breadcrumb-item> 销量目标管理</el-breadcrumb-item>
+          <el-breadcrumb-item> 全国 - 概况</el-breadcrumb-item>
+        </el-breadcrumb>
+      </template>
+    </bi-bar>
+    <div class="content cyc-xl-target">
+      <bi-panel :operating="false">
+        <template slot="title">
+          我制定的目标信息
+        </template>
+        <div v-loading="loading[0]" style="min-height:100px;">
+          <ul class="grid-target" v-if="target_list.length">
+            <li v-for="(item, key) in target_list">
+              <p>
+                <router-link :to="{path: 'target/detail', query: {serial_number: item.serial_number}}" :title="item.name">
+                {{ item.name }}
+                </router-link>
+                <el-badge v-if="key==0" value="new" class="grid-target-badge"></el-badge>
+              </p>
+              <font v-if="item.author">
+                {{ item.author.username }} {{ item.author.role_name }}
+                <cite>{{ item.create_time | date_format('YYYY-MM-DD') }}</cite>
+              </font>
+            </li>
+          </ul>
+          <bi-empty v-else-if="complete[0]">
+            <div slot="tips">
+             <span>
+               亲爱的，暂无相关数据，您的品牌及车型总目标还未制定，请先制定品牌总及车型总目标。
+             </span>
+              <div>
+                <router-link to="target" class="link" style="line-height: 50px; padding: 0 50px; height: 50px;margin-top: 50px">立即制定目标</router-link>
+              </div>
+            </div>
+          </bi-empty>
+        </div>
+      </bi-panel>
+
+      <bi-panel :operating="false" >
+        <template slot="title">
+          预警信息
+        </template>
+        <template slot="others">
+          <router-link
+            v-if="map_area == 1 && serial_number"
+            to="alarm/detail?type=national&area_name=全国&dimension=NATIONAL"
+            target="_blank"
+            class="edit-btn">
+            查看全国<i class="iconfont icon-right" style="font-size: 14px; top: 0; margin-left: 8px"></i>
+          </router-link>
+          <router-link
+            v-else-if="map_area == 2 && serial_number"
+            :to="{path:'alarm/detail',
+            query:{type:'region',
+            area_id: region_id,
+            area_name: region_name,
+            model_id: sub_model_id,
+            dimension: 'REGION'}}"
+            target="_blank"
+            class="edit-btn">
+            查看全区<i class="iconfont icon-right" style="font-size: 14px; top: 0; margin-left: 8px"></i>
+          </router-link>
+        </template>
+        <div v-loading="loading[1]" style="min-height: 200px;" element-loading-background="#fff">
+          <el-container v-if="serial_number">
+            <el-aside width="180px" class="warning-left" >
+              <el-dropdown trigger="click" @command="changeBrand" v-if="sub_models">
+                <div class="el-dropdown-link">
+                  {{brand_name}}<i class="el-icon-arrow-down el-icon--right"></i>
+                </div>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item v-for="item in brands" :command="item.id" :key="item.id">{{ item.name }}</el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+              <div class="car-box">
+                <ul>
+                  <li v-for="(item, key) in sub_models" @click="selectSubmodel(item.id)" :class="{'on': selected_models[item.id]}"><img :src="item.logo_url&&item.logo_url.indexOf('http') == 0 ? item.logo_url : '/static/images/nocar-nbg.png'" alt=""><span>{{ item.name }}</span></li>
+                </ul>
+              </div>
+            </el-aside>
+            <el-main>
+              <div class="warning-top" v-if="overview_info">
+                <el-row>
+                  <el-col :span="6">
+                    <div class="grid-warning">
+                      <h2>TY目标</h2>
+                      <h3>
+                        <template v-if="overview_info.ty != 'NaN'">{{overview_info.ty | number_format}}</template>
+                        <template v-else>暂无数据</template>
+                      </h3>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="grid-warning-right">
+                      <h2>MTD当月完成率 </h2>
+                      <span class="progress-box">
+                      <bi-progress
+                        :percentage="[overview_info.mtd_cr != 'NaN' ? overview_info.mtd_cr : -1]"
+                        :precision="1"
+                        color="#339acd"
+                        height="12" >
+                      </bi-progress>
+                    </span>
+                      <p :title="[overview_info.mtd_sales != 'NaN' ? ('完成销量：' + overview_info.mtd_sales) : '完成销量：暂无数据']">
+                        完成销量：
+                        <font style="color: #339acd" v-if="overview_info.mtd_sales != 'NaN'">{{overview_info.mtd_sales | number_format}}</font>
+                        <font style="color: #339acd" v-else>暂无数据</font>
+                      </p>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="grid-warning-right">
+                      <h2>YTD完成目标进度</h2>
+                      <span class="progress-box">
+                      <bi-progress
+                        :percentage="[overview_info.ytd_target_progress != 'NaN' ? overview_info.ytd_target_progress : -1]"
+                        :precision="1"
+                        color="#339acd"
+                        height="12" >
+                      </bi-progress>
+                    </span>
+                      <p :title="[overview_info.ytd_cr != 'NaN' ? ('YTD全年完成率：' + (overview_info.ytd_cr * 100).toFixed(1) + '%') : 'YTD全年完成率：暂无数据']">
+                        YTD全年完成率：
+                        <font style="color: #339acd" v-if="overview_info.ytd_cr != 'NaN'">{{ overview_info.ytd_cr | multiply(100) | number_format(1) }}%</font>
+                        <font style="color: #339acd" v-else>暂无数据</font>
+                      </p>
+                      <p
+                        :title="[overview_info.ytd_last_year_cr != 'NaN' ? ('去年YTD全年完成率：' + (overview_info.ytd_last_year_cr * 100).toFixed(1) + '%') : '去年YTD全年完成率：暂无数据']">
+                        去年YTD全年完成率：
+                        <font style="color: #339acd" v-if="overview_info.ytd_last_year_cr != 'NaN'">{{ overview_info.ytd_last_year_cr | multiply(100) | number_format(1) }}%</font>
+                        <font style="color: #339acd" v-else>暂无数据</font>
+                      </p>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="grid-warning-right">
+                      <h2>YTD市场份额</h2>
+                      <span class="progress-box">
+                      <bi-progress
+                        :percentage="[overview_info.ytd_share != 'NaN' ? overview_info.ytd_share : -1]"
+                        :precision="1"
+                        color="#339acd"
+                        height="12">
+                      </bi-progress>
+                    </span>
+                      <p :title="[overview_info.ytd_target_share != 'NaN' ? ('目标份额：' + (overview_info.ytd_target_share * 100).toFixed(1) + '%') : '目标份额：暂无数据']">
+                        目标份额：
+                        <font style="color: #339acd" v-if="overview_info.ytd_target_share != 'NaN'">{{ overview_info.ytd_target_share | multiply(100) | number_format(1) }}%</font>
+                        <font style="color: #339acd" v-else>暂无数据</font>
+                      </p>
+                      <p :title="[overview_info.ytd_share_diff != 'NaN' ? ('差额：' + (overview_info.ytd_share_diff * 100).toFixed(1) + '%') : '差额：暂无数据']">
+                        差额：
+                        <font style="color: #339acd" v-if="overview_info.ytd_share_diff != 'NaN'">{{ overview_info.ytd_share_diff | multiply(100) | number_format(1) }}%</font>
+                        <font style="color: #339acd" v-else>暂无数据</font>
+                      </p>
+                    </div>
+                  </el-col>
+                </el-row>
+              </div>
+              <div class="warning-center">
+              <span v-show="map_area == 2" @click="backToCountry()" class="back-btn btn-plain">
+                <i class="iconfont icon-icon&#45;&#45;"></i> 返回全国
+              </span>
+                <div v-show="map_area == 1" id="countryChart" style="width: 100%; height: 500px"></div>
+                <div v-show="map_area == 2" id="areaChart" style="width: 100%; height: 500px"></div>
+              </div>
+            </el-main>
+            <transition name="el-fade-in-linear">
+              <el-aside width="190px" v-if="areaPart" class="warning-right">
+                <div class="car-box" v-if="overview_children_page.length">
+                  <ul>
+                    <li v-for="item in overview_children_page">
+                      <router-link class="box" target="_blank" :to="{path: '/zhiku/xl/country/alarm/detail', query: {type: 'region', area_name: item.metadata.name, area_id: item.metadata.id, dimension: dimension_type, regionid: region_id}}">
+                        <h3><router-link target="_blank" :to="{path: '/zhiku/xl/country/alarm/detail', query: {type: 'region', area_name: item.metadata.name, area_id: item.metadata.id, dimension: dimension_type, regionid: region_id}}">{{ item.metadata.name }}</router-link></h3>
+                        <p>
+                          TY目标：
+                          <span v-if="item.ty != 'NaN'">{{ item.ty | number_format }}</span>
+                          <span v-else>暂无数据</span>
+                        </p>
+                        <p>
+                          MTD当月完成率：
+                          <span v-if="item.mtd_cr != 'NaN'">{{ item.mtd_cr | multiply(100) | number_format(1) }}%</span>
+                          <span v-else>暂无数据</span>
+                        </p>
+                        <p>
+                          YTD完成进度：
+                          <span v-if="item.ytd_target_progress != 'NaN'">{{ item.ytd_target_progress | multiply(100) | number_format(1) }}%</span>
+                          <span v-else>暂无数据</span>
+                        </p>
+                        <p>
+                          YTD市场份额：
+                          <span v-if="item.ytd_share != 'NaN'">{{ item.ytd_share | multiply(100) | number_format(1) }}%</span>
+                          <span v-else>暂无数据</span>
+                        </p>
+                      </router-link>
+                    </li>
+                  </ul>
+                </div>
+                <bi-empty v-else-if="complete[2]" :show-result="false">
+                  <span slot="tips">暂无数据</span>
+                </bi-empty>
+              </el-aside>
+            </transition>
+          </el-container>
+          <bi-empty v-else-if="complete[1]">
+            <div slot="tips">
+             <span>
+               亲爱的，暂无相关数据，您的品牌及车型总目标还未制定，请先制定品牌总及车型总目标。
+             </span>
+              <div>
+                <router-link to="target" class="btn-primary" style="line-height: 50px; padding: 0 50px; height: 50px;margin-top: 50px">立即制定目标</router-link>
+              </div>
+            </div>
+          </bi-empty>
+        </div>
+      </bi-panel>
+    </div>
+	</div>
+</template>
+<script type="text/ecmascript-6">
+  import BiBar from '@index/components/bar.vue'
+  import BiPanel from '@index/components/panel.vue'
+  import BiProgress from '@index/components/progress'
+  import BiEmpty from '@index/components/empty.vue'
+  import mixin from '@index/config/mixin'
+  import sales from './_mixin'
+  import echarts from 'echarts'
+  import map from 'echarts/map/json/china';
+
+  export default {
+		name: '',
+    mixins: [mixin, sales],
+    data() {
+			return {
+        areaPart: true,
+        brand_id: '',
+        brand_name: '',
+        brands: [],
+        brands_models: [],
+        map_area: 1,
+        overview_info: '',
+        overview_children: [],
+        page: 1,
+        page_size: 5,
+        region_id: '',
+        regions: [],
+        region_name: '',
+        sub_model_id: '',
+        serial_number: '',
+        selected_models: {},
+        target_list: [],
+        total_page: 0,
+        tooltips: false,
+        selected_region_color:'',
+        dimension_type: 'REGION',
+
+        province_map: {
+          "北京": ['北京市'],
+          "辽宁": ['辽宁省'],
+          "湖北": ['湖北省'],
+          "重庆": ['重庆市'],
+          "河南": ['河南省'],
+          "湖南": ['湖南省'],
+          "河北": ['河北省'],
+          "山西": ['山西省'],
+          "广东": ['广东省'],
+          "浙江": ['浙江省'],
+          "安徽": ['安徽省'],
+          "江苏": ['江苏省'],
+          "上海": ['上海市'],
+          "黑龙江": ['黑龙江省'],
+          "天津": ['天津市'],
+          "云南": ['云南省'],
+          "新疆": ['新疆维吾尔族自治区', '新疆维吾尔自治区'],
+          "江西": ['江西省'],
+          "广西": ['广西壮族自治区'],
+          "甘肃": ['甘肃省'],
+          "内蒙古": ['内蒙古自治区'],
+          "陕西": ['陕西省'],
+          "吉林": ['吉林省'],
+          "山东": ['山东省'],
+          "福建": ['福建省'],
+          "贵州": ['贵州省'],
+          "青海": ['青海省'],
+          "西藏": ['西藏自治区'],
+          "四川": ['四川省'],
+          "宁夏": ['宁夏回族自治区'],
+          "海南": ['海南省'],
+//          "台湾": ['台湾省'],
+//          "香港": ['香港'],
+//          "澳门": ['澳门'],
+//          "南海诸岛": ['南海诸岛'],
+        },
+        colored_by_range: [
+          {color: "#99cc00", range: [1, 'max']},
+          {color: "#ff9900", range: [0.8, 1]},
+          {color: "#f04048", range: [0, 0.8]},
+        ],
+        loading: new Array(3).fill(false),
+        complete: new Array(3).fill(false),
+      }
+		},
+    computed: {
+      overview_children_page() {
+        // return this.getListData(this.overview_children)
+        return this.overview_children
+      },
+      sub_models() {
+        let sub_models = this.brands_models.filter( item => {
+          let id = item.previous_level.id
+          return id == this.brand_id
+        })
+        return sub_models.length ? sub_models[0].list : []
+      },
+      region_valid() {
+        let region_ids = this.overview_children.map( item => {
+          return item.metadata.id
+        })
+        let regions = this.regions.filter( item => {
+          return region_ids.includes(item.previous_level.id)
+        })
+        return regions
+      },
+      region_groups() {
+        let region_groups = []
+        , province_map = this.province_map
+        this.region_valid.map( item => {
+          let region_id = item.previous_level.id
+          , region_name = item.previous_level.name
+          item.list.map( item2 => {
+            let name = ''
+            for (let key in province_map) {
+              let values = province_map[key]
+              if (values.includes(item2.name)) {
+                name = key
+              }
+            }
+            name = name || item2.name
+            region_groups.push({
+              "name": name,
+              "regions": region_name,
+              "value": 1,
+              "id": region_id
+            })
+          })
+        })
+        return region_groups
+      },
+      regionsColor() {
+        let colored_by_range = this.colored_by_range
+        return this.overview_children.map( (item, key) => {
+          let row = colored_by_range.find( row => {
+            let value = item.ytd_cr
+            return value >= row.range[0] && (row.range[1] == 'max' ? true : value < row.range[1])
+          })
+          return {name: item.metadata.name, color: row ? row.color : ''}
+        })
+      },
+      provinceColor() {
+        let colored_by_range = this.colored_by_range
+        , province_map = this.province_map
+
+        return this.overview_children.map( (item, key) => {
+          let row = colored_by_range.find( row => {
+            let value = item.ytd_cr
+            return value >= row.range[0] && (row.range[1] == 'max' ? true : value < row.range[1])
+          })
+          let name = ''
+          for (let key in province_map) {
+            let values = province_map[key]
+            if (values.includes(item.metadata.name)) {
+              name = key
+            }
+          }
+          return {name: name, color: row.color || ''}
+        })
+      }
+    },
+    watch: {
+      brands_models() {
+        this.brands = this.brands_models.map( item => {
+          return item.previous_level
+        })
+        if (!this.brand_id && this.brands.length) {
+          this.brand_id = this.brands[0].id
+          this.brand_name = this.brands[0].name
+        }
+      },
+    },
+    mounted(){
+      this.brand_id = 15
+      this.brand_name = '别克'
+      this.GET_TARGET_LOG_PAGE()
+      this.GET_REGION(() => {
+        this.GET_NEWST_TARGET(() => {
+          this.GET_SUB_MODEL()
+          this.getData()
+        })
+      })
+    },
+    methods:{
+      selectSubmodel(key){
+        if (key == this.sub_model_id){
+          this.sub_model_id = ''
+          key = ''
+        }else{
+          this.sub_model_id = key
+        }
+        this.selected_models = {}
+        this.sub_models.map( item => {
+          if (item.id == key) {
+            this.selected_models[item.id] = true
+          } else {
+            this.selected_models[item.id] = false
+          }
+        })
+        this.getData()
+      },
+      getListData(data = []) {
+        let offset = (this.page - 1) * this.page_size
+        , limit = this.page_size
+        this.total_page = Math.ceil(data.length / this.page_size)
+
+        let output = []
+        for (var x in data) {
+          if (x < offset || x >= offset + limit)continue
+          output.push(data[x])
+        }
+        return output
+      },
+      changeBrand(brand_id) {
+        let brand = this.brands.find(item => {
+          return item.id == brand_id
+        })
+        if (!brand)return
+        this.brand_id = brand.id
+        this.brand_name = brand.name
+        this.getData()
+      },
+      backToCountry() {
+        this.map_area = 1
+        this.dimension_type = 'REGION'
+        this.GET_NEWST_TARGET(() => {
+          this.GET_SUB_MODEL()
+          this.getData(true)
+        })
+      },
+      getData(load_map = true) {
+        if (!this.serial_number) return
+
+        var callback = () => {}
+
+        switch (this.map_area) {
+          case 1:
+            if (load_map) {
+              callback = () => {
+                echarts.parseGeoJson(map);
+                echarts.registerMap('china', {"type":"FeatureCollection", "features": map.features, "UTF8Encoding":false});
+                this.initChart()
+              }
+            }
+            this.GET_TARGET_OVERVIEW({
+              manage_dimension: 'NATIONAL',
+              dimension_id: 0,
+            }, (data) => {
+              this.overview_info =  data[0] || ''
+            })
+            this.GET_TARGET_OVERVIEW({
+              manage_dimension: 'REGION',
+              dimension_id: 0,
+            }, (data=[]) => {
+              this.overview_children = data
+              this.$nextTick(() => {
+                callback()
+              })
+            })
+            break;
+          case 2:
+            if (!this.region_id) break
+            if (load_map) {
+              let region = this.regions.find( item => {
+                return item.previous_level.id == this.region_id
+              })
+              , provinces = !!region ? region.list : []
+              , province_map = this.province_map
+              provinces = provinces.map( item => {
+                let name = ''
+                for (let key in province_map) {
+                  let values = province_map[key]
+                  if (values.includes(item.name)) {
+                    name = key
+                  }
+                }
+                return {name}
+              })
+              callback = () => {
+                let map_features = []
+                for (let y in provinces) {
+                  for(let z in map.features){
+                    if(map.features[z].properties.name == provinces[y]['name']){
+                      map_features.push(map.features[z])
+                    }
+                  }
+                }
+                echarts.parseGeoJson(map);
+                echarts.registerMap(this.region_name, {"type":"FeatureCollection", "features": map_features, "UTF8Encoding":false});
+                this.initChart2()
+              }
+            }
+            this.GET_TARGET_OVERVIEW({
+              manage_dimension: 'REGION',
+              dimension_id: this.region_id,
+            }, (data) => {
+              this.overview_info = data[0] || ''
+            })
+            this.GET_TARGET_OVERVIEW({
+              manage_dimension: 'PROVINCE',
+              region_id: this.region_id
+            }, (data=[]) => {
+              this.overview_children = data
+              this.$nextTick(() => {
+                callback()
+              })
+            })
+            break
+        }
+      },
+      initChart(){
+        let _this = this;
+        let chartObject = document.getElementById('countryChart')
+        if (!chartObject)return;
+        let myChart = echarts.init(chartObject)
+        let option = {
+          tooltip:{
+            show: true,
+            formatter: function(params){
+              let regions = params.data ? (params.data.regions || '') : ''
+              if (regions){
+                if (params.data.regions!= '' || params.data.regions!=undefined || params.data.regions!=null){
+                  return  params.data.regions
+                }else{
+                  return '暂无该地区数据'
+                }
+              }else{
+                return ''
+              }
+            }
+          },
+          geo: {
+            map: 'china',
+            roam: false,
+            label: {
+              normal: {
+                show: false
+              },
+              emphasis: {
+                show: false,
+              }
+            },
+            itemStyle: {
+              normal: {
+                borderColor: '#fff',
+                borderWidth: 1,
+                shadowColor: 'rgba(63, 218, 255, 0.5)',
+              }
+            }
+          },
+          series: [
+            {
+              type: 'map',
+              geoIndex: 0,
+              itemStyle: {
+                normal: {
+                  color: function(params) {
+                    var region = _this.regionsColor.find(item => { return item.name == params.data.regions })
+                    var color = region ? region.color : '#eee'
+                    return color;
+                  }
+                }
+              },
+              data: this.region_groups
+            }]
+        };
+
+        myChart.on('mouseover', function(params){
+          let regions = params.data ? (params.data.regions || '') : ''
+          _this.region_groups.forEach(function(currentValue, index, arr){
+            if(regions == currentValue.regions){
+              myChart.dispatchAction({
+                type: 'highlight',
+                name: currentValue.name
+              });
+            }
+          })
+        })
+
+        myChart.on('mouseout', function(params){
+          let regions = params.data ? (params.data.regions || '') : ''
+          _this.region_groups.forEach(function(currentValue, index, arr){
+            if(regions == currentValue.regions){
+              myChart.dispatchAction({
+                type: 'downplay',
+                name: currentValue.name
+              });
+            }
+          })
+        })
+
+        myChart.on('click', function(params){
+          _this.region_id = params.data.id;
+          _this.region_name = params.data.regions;
+          _this.selected_region_color = params.color;
+          _this.dimension_type = 'PROVINCE'
+          _this.GET_NEWST_TARGET(() => {
+            _this.map_area = 2
+            _this.GET_SUB_MODEL()
+            _this.getData()
+          }, 'REGION')
+        })
+
+        myChart.setOption(option);
+      },
+      initChart2(){
+        let _this = this;
+        let myChart = echarts.init(document.getElementById('areaChart'))
+        let option = {
+          geo: {
+            map: this.region_name,
+            roam: false,
+            itemStyle: {
+              normal: {
+                borderColor: '#fff'
+              }
+            }
+          },
+          series: [
+            {
+              type: 'map',
+              geoIndex: 0,
+              itemStyle: {
+                normal: {
+                  color: function(params) {
+                    return _this.selected_region_color;
+                  }
+                }
+              },
+              data: this.region_groups
+            }]
+        };
+
+        myChart.on('mouseover', function(params){
+          let province = params.data.name;
+          _this.region_groups.forEach(function(currentValue, index, arr){
+            if(province == currentValue.name){
+              myChart.dispatchAction({
+                type: 'highlight',
+                name: currentValue.name
+              });
+            }
+          })
+        })
+
+        myChart.on('mouseout', function(params){
+          let province = params.data.name;
+          _this.region_groups.forEach(function(currentValue, index, arr){
+            if(province == currentValue.name){
+              myChart.dispatchAction({
+                type: 'downplay',
+                name: currentValue.name
+              });
+            }
+          })
+        })
+
+        myChart.on('click', function(params){
+        })
+
+        myChart.setOption(option);
+      },
+
+      GET_TARGET_LOG_PAGE() {
+        this.loading[0] = true
+        this.$request.get(this.$interface.GET_TARGET_LOG_PAGE, {
+          header: {token: this.token},
+          manage_dimension: 'NATIONAL',
+          page: 1,
+          rows: 6,
+        }, (response) => {
+          let data = response.data[0]
+          this.target_list = data.list || []
+          this.complete[0] = true
+          this.loading[0] = false
+        }, this.failure)
+      },
+      GET_TARGET_OVERVIEW(params={}, cb=()=>{}) {
+        this.loading[1] = true
+        this.$request.get(this.$interface.GET_TARGET_OVERVIEW, {
+          header: {token: this.token},
+          serial_number: this.serial_number || '',
+          brand_id: this.brand_id || '',
+          sub_model_id: this.sub_model_id || '',
+          manage_dimension: params.manage_dimension || 'NATIONAL',
+          region_id: params.region_id || '',
+          dimension_id: params.dimension_id || '',
+        }, (response) => {
+            this.complete = this.complete.map( (item,key) => {
+              return key == 1 ? true : item
+            })
+          this.loading[1] = false
+          let data = response.data
+          typeof cb == 'function' ? cb(data) : ''
+        }, this.failure)
+      },
+      GET_SUB_MODEL() {
+        this.$request.get(this.$interface.GET_SUB_MODEL, {
+          header: {token: this.token},
+          serial_number: this.serial_number || '',
+        }, (response) => {
+          let data = response.data
+          this.brands_models = data || []
+        }, this.failure)
+      },
+      GET_REGION(callback) {
+        this.$request.get(this.$interface.GET_REGION, {
+          header: {token: this.token},
+        }, (response) => {
+          let data = response.data
+          this.regions = data || []
+          typeof callback == 'function' ? callback() : ''
+        }, this.failure)
+      },
+      GET_NEWST_TARGET(callback=()=>{}, dimension_type = 'NATIONAL') {
+        this.$request.get(this.$interface.GET_NEWST_TARGET, {
+          header: {token: this.token},
+          manage_dimension: dimension_type,
+          region_id: dimension_type == 'REGION' ? this.region_id : '',
+        }, (response) => {
+          let data = response.data[0] || {}
+          let serial_number = data.serial_number || ''
+          if (!serial_number) {
+            this.$message.error({
+              title: '错误信息',
+              message: dimension_type == 'NATIONAL' ? '请先设置全国总目标' : '请先设置区域总目标'
+            });
+            this.dimension_type = 'REGION'
+            this.complete = this.complete.map( (item,key) => {
+              return key == 1 ? true : item
+            })
+            return
+          }
+          this.serial_number = serial_number
+          typeof callback == 'function' ? callback() : ''
+        }, this.failure)
+      }
+    },
+    components:{
+      BiBar,
+      BiPanel,
+      BiProgress,
+      BiEmpty
+    }
+	}
+</script>
+
+<style lang="scss" type="text/scss" scoped>
+
+</style>

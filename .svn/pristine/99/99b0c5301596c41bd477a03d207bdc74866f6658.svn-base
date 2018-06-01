@@ -1,0 +1,855 @@
+<template>
+  <div>
+    <bi-bar columnTitle="目标制定">
+      <template slot="button">
+        <span class="mgr20">时间：{{ year_month }}</span>
+        <span class="mgr20">管理维度：{{ dimension_name }}</span>
+        <span class="mgr20">管理类型：{{ manage_type }}</span>
+      </template>
+      <template slot="right">
+        <el-breadcrumb separator="/">
+          <span class="bread-legend">当前位置：</span>
+          <el-breadcrumb-item :to="{ path: '/' }">概览主页</el-breadcrumb-item>
+          <el-breadcrumb-item> 销量目标管理</el-breadcrumb-item>
+          <el-breadcrumb-item> 全国 - 目标制定</el-breadcrumb-item>
+        </el-breadcrumb>
+      </template>
+    </bi-bar>
+    <div class="content">
+      <bi-panel :operating="false" >
+        <template slot="title">请输入全国总目标</template>
+        <div slot="others">
+          <a href="javascript:void(0);" @click="dialogTableVisible = true" class="cyc-xl-step-btn ">导入全国总目标</a>
+          <router-link to="target/list" class="cyc-xl-step-btn on"><i class="iconfont icon-time"></i>查看过往制定的目标</router-link>
+          <router-link to="setting" class="cyc-xl-step-btn ">设置车型区域</router-link>
+          <el-dialog title="批量录入目标" width="1000px" :visible.sync="dialogTableVisible" lock-scroll>
+            <div style="margin: -20px 0px;" v-if="import_step==1">
+              <el-alert
+                title=""
+                type="warning"
+                description="提示：请把目标拷入以下编辑器，第一行为品牌总目标，以下为车型总目标。">
+              </el-alert>
+               <el-alert
+                v-if="showErrorTips"
+                title=""
+                type="error"
+                description="提示：请先导入excel文件，再进行下步操作。">
+              </el-alert>
+              <table class="cyc-xl-table_va">
+                <thead>
+                  <tr>
+                    <th width="10%">区域-车型</th>
+                    <th width="10%">TY-2018目标</th>
+                    <th width="6.5%">Jan</th>
+                    <th width="6.5%">Feb</th>
+                    <th width="6.5%">Mar</th>
+                    <th width="6.5%">Apr</th>
+                    <th width="6.5%">May</th>
+                    <th width="6.5%">Jun</th>
+                    <th width="6.5%">Jul</th>
+                    <th width="6.5%">Aug</th>
+                    <th width="6.5%">Sep</th>
+                    <th width="6.5%">Oct</th>
+                    <th width="6.5%">Nov</th>
+                    <th width="6.5%">Dec</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="i in 3">
+                    <td>品牌</td>
+                    <td>1234152</td>
+                    <td>94394</td>
+                    <td>73465</td>
+                    <td>87179</td>
+                    <td>87068</td>
+                    <td>101043</td>
+                    <td>102862</td>
+                    <td>98594</td>
+                    <td>112380</td>
+                    <td>112112</td>
+                    <td>92744</td>
+                    <td>112531</td>
+                    <td>112531</td>
+                  </tr>
+                </tbody>
+              </table>
+              <el-upload
+                class="upload-demo" style="width:360px; margin:16px auto;"
+                drag
+                :action="upload_url"
+                :headers="headers"
+                :on-success="handleSuccessFile"
+                :on-error="handleErrorFile"
+                list-type="text"
+                multiple>
+                <i class="el-icon-upload"></i>
+                <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                <div class="el-upload__tip" slot="tip">请把全国总目标导入本编辑器中，导入文件必须为Exel格式，格式必须与上图一致。还没有模版，请先<a href="javascript:void(0);" @click="downTemplate">下载</a>编辑。</div>
+              </el-upload>
+            </div>
+            <div style="margin: -20px 0px;" v-if="import_step==2">
+              <el-alert
+                title=""
+                type="warning"
+                show-icon
+                description="抱歉，您的品牌总目标与车型总目标不等，请重新编辑您的模版。">
+              </el-alert>
+              <table class="cyc-xl-table_va">
+                <thead>
+                  <tr>
+                    <th width="10%">区域-车型</th>
+                    <th width="10%">TY-2018目标</th>
+                    <th width="6.5%">Jan</th>
+                    <th width="6.5%">Feb</th>
+                    <th width="6.5%">Mar</th>
+                    <th width="6.5%">Apr</th>
+                    <th width="6.5%">May</th>
+                    <th width="6.5%">Jun</th>
+                    <th width="6.5%">Jul</th>
+                    <th width="6.5%">Aug</th>
+                    <th width="6.5%">Sep</th>
+                    <th width="6.5%">Oct</th>
+                    <th width="6.5%">Nov</th>
+                    <th width="6.5%">Dec</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="excelData.brandTarget" :class="{error: excelData.invalidPosition.rows.includes(0)}">
+                    <td>{{ excelData.brandTarget.brand.name }}</td>
+                    <td :class="{error: excelData.invalidPosition.cols.includes(1)}"><em>{{ excelData.brandTarget.ty | number_format }}</em></td>
+                    <td :class="{error: excelData.invalidPosition.cols.includes(colIndex+2)}" v-for="(item, colIndex) in excelData.brandTarget.monthTarget"><em>{{ item | number_format }}</em></td>
+                  </tr>
+                  <tr v-for="(model, index) in excelData.subModelTarget" :class="{error: excelData.invalidPosition.rows.includes(index+1)}">
+                    <td>{{ model.subModel.name }}</td>
+                    <td :class="{error: excelData.invalidPosition.cols.includes(1)}"><em>{{ model.ty | number_format }}</em></td>
+                    <td :class="{error: excelData.invalidPosition.cols.includes(colIndex+2)}" v-for="(item, colIndex) in model.monthTarget"><em>{{ item | number_format }}</em></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogTableVisible = false">取 消</el-button>
+              <el-button type="primary" @click="autoFillData()">确定</el-button>
+            </div>
+          </el-dialog>
+        </div>
+        <div class="cyc-xl-step">
+          <ul class="step-bar">
+            <li class="active">
+              <span>1</span>
+              <div>
+                进行中
+                <em></em>
+                <small>请输入全国总目标</small>
+              </div>
+            </li>
+            <li>
+              <span class="iconfont">2</span>
+              <div>
+                待进行
+                <em></em>
+                <small>按区域车型制定目标</small>
+              </div>
+            </li>
+            <li>
+              <span class="iconfont">3</span>
+              <div>
+                待进行
+                <em></em>
+                <small>按车型区域月份制定</small>
+              </div>
+            </li>
+            <li>
+              <span class="iconfont">4</span>
+              <div>
+                待进行
+                <small>预览结果并下发任务</small>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </bi-panel>
+      <bi-panel :operating="false" title-size="small" style="margin-bottom: -2px;">
+        <template slot="title">请输入品牌总目标</template>
+        <template slot="others">
+          <span class="cyc-xl-title-tips">
+            <font>说明：MTD 当前月份</font>
+            <font>YTD 累积至当前月份</font>
+            <font>RTD 下月累积至年底</font>
+            <font>TY  全年累积</font>
+          </span>
+        </template>
+        <div>
+          <table class="cyc-xl-table_va">
+            <thead>
+              <tr>
+                <th width="13%">品牌</th>
+                <th width="23">TY-2018目标</th>
+                <th width="16%">TY-2017实际完成</th>
+                <th width="21%">最新目标-相对去年增长</th>
+                <th width="10%">TY(0+12)</th>
+                <th width="17%">最新目标-相对0+12增长</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ brand_target.metadata.name }}</td>
+                <td :class="brand_status" @click.stop="clickEvent=!clickEvent">
+                  <cite v-if="['default'].includes(brand_status)" @click="focusBrandTarget(this)">请输入目标数</cite>
+                  <cite v-else-if="['complete', 'error'].includes(brand_status)" @click="focusBrandTarget(this)">{{ brand_target.ty | number_format }}</cite>
+                  <input v-else type="text" class="" placeholder="请输入目标数"
+                         v-model="brand_sales_target"
+                         v-focus="brand_focus"
+                         @click="brand_status='edit'"
+                         @blur="blurBrandTarget()">
+                   <span v-if="refresh == 1" class="cyc-xl-table_btn" @click="refreshTarget()" @click.stop="clickEvent=!clickEvent">刷新</span>
+                   <span v-else-if="refresh == 2" class="refresh">已刷新</span>
+                </td>
+                <td>{{ brand_target.ly_sales | number_format }}</td>
+                <td>
+                  <template v-if="brand_target.ty_yoy != 'NaN'">
+                    {{ brand_target.ty_yoy | multiply(100) | number_format(1) }}%
+                  </template>
+                  <template v-else>
+                    亲，暂未制定目标
+                  </template>
+                </td>
+                <td>{{ brand_target.last_ty | number_format }}</td>
+                <td>
+                  <template v-if="brand_target.ty_mom != 'NaN'">
+                    {{ brand_target.ty_mom | multiply(100) | number_format(1) }}%
+                  </template>
+                  <template v-else>
+                    亲，暂未制定目标
+                  </template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </bi-panel>
+      <bi-panel :operating="false" title-size="small">
+        <template slot="title">请输入车型总目标</template>
+        <div v-loading="loading"  element-loading-background="#fff" style="min-height: 300px;">
+          <table class="cyc-xl-table_va" @click="tableClick()">
+            <thead>
+              <tr>
+                <th width="13%">车型</th>
+                <th width="23">TY-2018目标</th>
+                <th width="16%">TY-2017实际完成</th>
+                <th width="21%">最新目标-相对去年增长</th>
+                <th width="10%">TY(0+12)</th>
+                <th width="17%">最新目标-相对0+12增长</th>
+              </tr>
+            </thead>
+            <tbody :class="model_group_status" v-if="model_target.length">
+              <tr v-for="(item, key) in model_target">
+                <td>{{item.metadata.name}}</td>
+                <td :class="model_status[key]" @mouseenter="mouseenterInput(key)" @mouseleave="mouseleaveInput(key)" @click="focusModelTarget(key,click_flag)" @click.stop="clickEvent=!clickEvent">
+                  <el-popover
+                    v-model="popover_status[key]"
+                    :visible-arrow="true"
+                    popper-class="cyc-xl-table_box_tips"
+                    placement="top"
+                    trigger="click">
+                    <div v-if="remainTarget == 0&&!checkNull()" class="cyc-xl-table_tips">
+                      您的车型总目标已分配完成
+                    </div>
+                    <div v-else class="cyc-xl-table_tips error">
+                      <template v-if="remainTarget > 0">
+                        未分配总目标：{{remainTarget | number_format}}
+                      </template>
+                      <template v-else-if="remainTarget == 0&&checkNull()">
+                        您的车型总目标还未分配完成
+                      </template>
+                      <template v-else-if="remainTarget < 0">
+                        已超出总目标：{{remainTarget*-1 | number_format}}
+                      </template>
+                    </div>
+                  </el-popover>
+                  <div style="color:red;font-size: 12px;">
+                  <span v-if="key==0&&remainTarget>0&&errortip_state">
+                    <i class="el-icon-warning"></i>&nbsp;未分配总目标：{{ remainTarget | number_format }}</span>
+                  <span v-else-if="key==0&&remainTarget<0&&errortip_state">
+                    <i class="el-icon-warning"></i>&nbsp;已超出总目标：{{ remainTarget*-1 | number_format }}</span>
+                  <span v-else-if="key==0&&remainTarget==0&&errortip_state&&checkNull()">
+                    <i class="el-icon-warning"></i>&nbsp;您的车型总目标还未分配完成</span>
+                  </div>
+                  <cite v-if="['default'].includes(model_status[key])" @click="focusModelTarget(key)">请输入目标数</cite>
+                  <cite v-else-if="['complete', 'error'].includes(model_status[key])" @click="focusModelTarget(key,click_flag)">{{ sub_model_sales_targets[key]*1 | number_format }}</cite>
+                  <input
+                    v-else
+                    type="text"
+                    placeholder="请输入目标数"
+                    @blur="blurInput(key)"
+                    @keyup="keyupInput(key)"
+                    v-focus="model_focus[key]"
+                    v-model="sub_model_sales_targets[key]">
+                  <span class="cyc-xl-table_btn" v-if="model_hover[key]&&editbtn_state" @click="focusModelTarget(key,2)">编辑</span>
+                </td>
+                <td>{{ item.ly_sales | number_format }}</td>
+                <td>
+                 <template v-if="item.ty_yoy != 'NaN'">
+                   {{ item.ty_yoy | multiply(100) | number_format(1) }}%
+                 </template>
+                  <template v-else>
+                    亲，暂未制定目标
+                  </template>
+                </td>
+                <td>{{ item.last_ty | number_format }}</td>
+                <td>
+                  <template v-if="item.ty_mom != 'NaN'">
+                    {{ item.ty_mom | multiply(100) | number_format(1) }}%
+                  </template>
+                  <template v-else>
+                    亲，暂未制定目标
+                  </template>
+                </td>
+              </tr>
+            </tbody>
+            <tbody v-else-if="complete"><tr><td colspan="6"><bi-empty><span slot="tips"></span></bi-empty></td></tr></tbody>
+          </table>
+        </div>
+      </bi-panel>
+      <span class="cyc-xl-btn" @click="nextStep(true)">下一步：制定区域车型目标</span>
+    </div>
+  </div>
+</template>
+
+<script type="text/ecmascript-6">
+  import BiBar from '@index/components/bar.vue'
+  import BiPanel from '@index/components/panel.vue'
+  import BiEmpty from '@index/components/empty.vue'
+  import mixin from '@index/config/mixin'
+  import sales from './_mixin'
+  import Vue from 'vue'
+
+  export default {
+    name: '',
+    mixins: [mixin, sales],
+    data() {
+      return {
+        remainTarget: 0, //剩下的目标
+        resplit: this.$route.query.resplit,
+        popover_status: [],
+        brand_sales_target: '', //品牌目标总数
+        newSum_target: '', //新的品牌目标总数（用于比较品牌目标总数有没变化，是否显示刷新按钮）
+        oldSum_target: '', //旧的品牌目标总数（用于比较品牌目标总数有没变化，是否显示刷新按钮）
+        refresh: 0,
+        apply: true,//当车型总目标有修改过，点空白处可以请求接口
+        sub_model_sales_target_obj: [],
+        sub_model_sales_targets: [],
+        brand_target: {
+          metadata: {},
+          ty: '',            // 今年目标
+          ly_sales: '',      // 去年实际
+          ty_yoy: '',        // 本次目标相对去年真实销量的增长
+          last_ty: '',       // 去年目标 ,
+          ty_mom: '',        // 本次目标相对上次制定目标的增长
+        },
+        model_target:[],
+
+        serial_number: this.$route.query.serial_number || '',
+        brand_status: 'default', // 品牌总目标输入框状态
+        brand_focus: false,
+        click_flag:0,//编辑按钮出现后的，移除输入框的点击事件（0：默认可点击，1：不可以点击，2：编辑按钮的弹框）
+
+        model_focus: [], // 车型总目标输入框状态
+        model_hover: [], // 车型总目标输入框状态
+        editbtn_state: false,//编辑按钮是否出现
+        errortip_state: false,//列表顶部的错误提示
+        model_status: [],  //输入框状态 'default'：数据正常状态， 'edit'：代表进入输入框， 'complete'：代表完成状态， 'error'：代表错误状态
+        model_group_status: '', // 车型总目标输入框状态
+        clickEvent: false,
+        loading: false,
+        complete: false,
+
+        dialogTableVisible: false,
+        brand_id: 15,
+        upload_url: this.$interface.UPLOAD_FILE,
+        import_step: 1,
+        tableData: {},
+        showErrorTips: false,
+        excelData: {
+          brandTarget : {
+            brand : {
+              id : 15,
+              name : "别克"
+            },
+            lastTy : 110000,
+            lySales : 110000,
+            monthTarget : [ 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000 ],
+            ty : 120000,
+            tyMom : 0.091,
+            tyYoy : 0.091
+          },
+          invalidPosition : {
+            cols : [ 0, 3, 10 ],
+            rows : [ 0, 4, 9, 17 ]
+          },
+          subModelTarget : [ {
+            lastTy : 110000,
+            lySales : 110000,
+            monthTarget : [ 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000 ],
+            subModel : {
+              id : 2212,
+              logoUrl : "http://web.thinktanksgmmd.com/sgm_picture/别克/上汽通用别克/英朗/1.jpg",
+              name : "全新英朗",
+              newDesc : "换代"
+            },
+            ty : 120000,
+            tyMom : 0.091,
+            tyYoy : 0.091
+          } ]
+        },
+      }
+    },
+    mounted(){
+      let cb = (response) => {
+        let data = response.data[0]
+        let status = ''
+        this.sub_model_sales_targets = []
+        data.list.map((item, i) => {
+          this.sub_model_sales_targets.push(item.ty || '')
+          Vue.set(this.popover_status, i, false)
+          Vue.set(this.model_focus, i, false)
+          Vue.set(this.model_hover, i, false)
+          Vue.set(this.model_status, i, 'default')
+          if(item.ty > 0){
+            status = 'complete'
+          }
+        })
+        if(status){
+          this.sub_model_sales_targets = []
+          data.list.map((item, i) => {
+            this.sub_model_sales_targets.push(item.ty)
+            Vue.set(this.model_status, i, 'complete')
+          })
+        }
+      }
+      if (!this.serial_number) {
+        this.NATIONAL_MAKING_INFO(cb)
+      } else {
+        let resplit = this.resplit == undefined ? false : this.resplit
+        this.GET_TOTAL_TARGET(resplit, cb)
+      }
+    },
+    directives: {
+      focus: {
+        inserted: function (el, {value}) {
+          if (value) {
+            let val = Number(el.value)
+            if (val <= 0) {
+              el.value = ''
+            }
+            el.focus()
+          }
+        }
+      }
+    },
+    computed: {
+      headers() {
+        return {token: this.token}
+      },
+    },
+    watch: {
+      brand_target() {
+        if (!!this.brand_target.ty) {
+          this.brand_sales_target =  [this.brand_target.ty, ...this.brand_target.monthTarget]
+          this.brand_status = 'complete'
+        }
+      },
+      model_target() {
+        let data = []
+        this.model_target.map( item => {
+          data.push({id: item.metadata.id, sales: item.ty || ''})
+        })
+        this.sub_model_sales_target_obj = data
+      },
+      sub_model_sales_targets() {
+        let data = []
+        for (let key in this.sub_model_sales_target_obj) {
+          let item = this.sub_model_sales_target_obj[key]
+          data.push({
+            id: item.id,
+            sales: this.to_zero(this.sub_model_sales_targets[key])
+          })
+        }
+        this.sub_model_sales_target_obj = data
+        this.apply = true
+      },
+      brand_sales_target() { //品牌目标总数
+        let sales_targets = 0,brandTargetVal = this.to_zero(this.brand_sales_target)
+        for(let i in this.sub_model_sales_targets){
+          sales_targets += Number(this.sub_model_sales_targets[i])
+        }
+        this.remainTarget = brandTargetVal - sales_targets
+        if(brandTargetVal != 0 && brandTargetVal.length != 0 && !this.checkAllNull() && this.remainTarget == 0){  //从第二步返回上一步的情况
+          this.model_group_status = 'completeList'
+          this.editbtn_state = true     //编辑按钮出现
+          this.click_flag = 1           //输入框不可点击
+          this.errortip_state = true
+        }
+      },
+    },
+    methods:{
+      tableClick: function () {
+        let brandTargetVal = this.to_zero(this.brand_sales_target)
+        if (brandTargetVal.length == 0 || brandTargetVal ==0 || this.checkAllNull()){ //如果（品牌总目标没填，品牌总目标为0，车型总目标全部没填）则不做处理
+          this.model_group_status = 'defaultList'
+          return
+        }
+        if(this.remainTarget==0 && !this.checkNull()){
+          this.model_group_status = 'completeList'
+          this.editbtn_state = true               //编辑按钮出现
+          this.click_flag = 1                     //输入框不可点击
+          this.errortip_state = false
+          if(this.apply){
+            this.PUT_TOTAL_TARGET(false, () => { //全部填满并等于总目标 请求接口
+              this.apply = false
+            })
+          }
+        }else{
+          this.model_group_status = 'errorList'
+          this.editbtn_state = false//编辑按钮消失
+          this.click_flag = 0//输入框可点击
+          this.errortip_state = true
+        }
+      },
+      blurBrandTarget() {
+        let brandTargetVal = this.brand_sales_target
+        if(brandTargetVal.length == 0){
+          this.brand_status = 'default'
+          return
+        }else {
+          let brandSalesTarget = this.to_zero(this.brand_sales_target)
+          this.newSum_target = brandSalesTarget
+          this.brand_sales_target = brandSalesTarget
+
+          this.brand_focus = false
+          this.brand_target.ty = this.brand_sales_target
+        }
+        if(this.checkAllNull()){
+          this.refresh = 0
+          this.brand_status = 'complete'
+          if(this.newSum_target != this.oldSum_target){
+            this.PUT_TOTAL_TARGET()
+          }
+        }else{
+          if(this.newSum_target != this.oldSum_target){
+            this.refresh = 1
+          }else {
+            this.refresh = 0
+            this.brand_status = 'complete'
+          }
+        }
+      },
+      focusBrandTarget() {
+        let brandSalesTarget = this.to_zero(this.brand_sales_target)
+        this.oldSum_target = brandSalesTarget
+        if(!this.checkAllNull()){
+          this.$confirm('<p>亲爱的，您确定要修改品牌总目标？ <br/>修改后品牌总目标需要逐个重新分配到车型总目标。</p>', '温馨提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '放弃',
+            type: 'warning',
+            center: true,
+            dangerouslyUseHTMLString: true
+          }).then(() => {
+            this.brand_status = 'edit'
+            this.brand_focus = true
+          }).catch(() => {
+            this.brand_status = 'complete'
+            this.brand_focus = false
+          });
+        }else {
+          this.model_group_status = 'defaultList'
+          this.brand_status = 'edit'
+          this.brand_focus = true
+        }
+      },
+      focusModelTarget(key,click_flag) {
+        if (!this.brand_sales_target) {
+          this.$confirm('<div>亲爱的，您的品牌总目标还未制定，<br>请先制定品牌总目标。</div>', '温馨提示', {
+            cancelButtonText: '知道了',
+            type: 'error',
+            center: true,
+            showConfirmButton: false,
+            dangerouslyUseHTMLString: true
+          }).catch(() => {
+            this.brand_status = 'edit'
+            this.brand_focus = true
+          });
+        }else if(click_flag==2){
+          this.$confirm('<p>亲爱的，您车型总目标已分配完成， <br/>您确定要修改车型总目标？</p>', '温馨提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '放弃',
+            type: 'warning',
+            center: true,
+            dangerouslyUseHTMLString: true
+          }).then(() => {
+            Vue.set(this.popover_status,key,true)
+            Vue.set(this.model_status,key,'edit')
+            Vue.set(this.model_focus,key,true)
+            this.model_group_status = 'editList'
+            this.errortip_state = false
+            this.editbtn_state = false
+            this.click_flag = 0
+            this.calRemainTarget()
+          }).catch(() => {});
+        }else if(click_flag==1){
+          return
+        }else {
+          Vue.set(this.popover_status,key,true)
+          Vue.set(this.model_status,key,'edit')
+          Vue.set(this.model_focus,key,true)
+          this.model_group_status = 'editList'
+          this.errortip_state = false
+          this.calRemainTarget()
+        }
+      },
+      blurInput(key){
+        let inputVal = this.sub_model_sales_targets[key]
+        this.popover_status = this.popover_status.map( (item, index) => {
+          return key === index ? false : item
+        })
+        this.model_status = this.model_status.map( (item, index) => {
+          return key === index ? 'complete' : item
+        })
+        this.model_focus = this.model_focus.map( (item, index) => {
+          return key === index ? false : item
+        })
+        if(inputVal.length == 0){
+          Vue.set(this.model_status, key, 'default')
+          Vue.set(this.model_focus, key, false)
+        }else {
+          this.sub_model_sales_targets[key] = this.to_zero(inputVal)
+        }
+      },
+      keyupInput(key){
+        this.calRemainTarget()
+      },
+      mouseenterInput(key){
+        if(this.model_status[key]=='complete'){
+          Vue.set(this.model_hover,key,true)
+        }
+      },
+      mouseleaveInput(key){
+        Vue.set(this.model_hover,key,false)
+      },
+      calRemainTarget() {
+        let model_sales_total_target = 0
+        for(let i in this.sub_model_sales_targets){
+          model_sales_total_target += this.to_zero(this.sub_model_sales_targets[i])
+        }
+        this.remainTarget = this.brand_sales_target - model_sales_total_target
+      },
+      nextStep(resplit = false){
+        if(this.brand_sales_target <= 0 || this.brand_sales_target == undefined){
+          this.$confirm('<div>亲爱的，您的品牌总目标还未制定，<br>请先制定品牌总目标。</div>', '温馨提示', {
+            cancelButtonText: '知道了',
+            type: 'error',
+            center: true,
+            showConfirmButton: false,
+            dangerouslyUseHTMLString: true
+          }).catch(() => {
+            this.brand_status = 'edit'
+            this.brand_focus = true
+          });
+        }else if(this.remainTarget!=0){
+          let message = this.remainTarget >= 0 ? this.number_format(this.remainTarget) + '</strong></div><div><em>未分配品牌总目标</em></div>':
+            this.number_format(this.remainTarget*-1) + '</strong></div><div><em>已超出品牌总目标</em></div>'
+          this.$confirm('<div>抱歉，您的品牌总目标还未分配完成，请继续<br>制定车型总目标。</div><div><strong style="font-size:20px;color:red;">'
+            + message, '温馨提示', {
+            type: 'error',
+            center: true,
+            showCancelButton: false,
+            showConfirmButton: false,
+            dangerouslyUseHTMLString: true
+          }).catch(() => {
+            this.model_group_status = 'errorList'
+          });
+        }else if(this.checkNull()){
+          this.$confirm('<div>抱歉，您的车型总目标还未分配完成，请继续<br>制定车型总目标。</div>', '温馨提示', {
+            type: 'error',
+            center: true,
+            showCancelButton: false,
+            showConfirmButton: false,
+            dangerouslyUseHTMLString: true
+          }).catch(() => {
+            this.model_group_status = 'errorList'
+          });
+        }else {
+          this.PUT_TOTAL_TARGET(false, (response) => {
+            if (!!response.verify_msg) {
+              alert(response.verify_msg)
+              return
+            }
+            this.$router.push({path: '/zhiku/xl/country/target/setvb', query: {serial_number: this.serial_number, resplit: true}})
+          })
+        }
+      },
+      refreshTarget() {
+        if (!this.brand_target.ty)return
+        for(let i in this.sub_model_sales_target_obj){
+          this.sub_model_sales_target_obj[i].sales=this.sub_model_sales_targets[i]
+        }
+        this.PUT_TOTAL_TARGET(false, () => {
+          this.refresh = 2
+        })
+      },
+      checkNull() { //检查车型总目标是否存在未填的
+        let isNull = false
+        if (this.sub_model_sales_targets.length==0) return true
+        this.sub_model_sales_targets.map( (item,i) =>{
+          if(item.length == 0){
+            isNull = true
+          }
+        })
+        return isNull
+      },
+      checkAllNull() { //检查车型总目标是否全部未填的
+        let isAllNull = true
+        this.sub_model_sales_targets.map( (item,i) =>{
+          if(item.length != 0){
+            isAllNull = false
+          }
+        })
+        return isAllNull
+      },
+      handleSuccessFile(response, file, fileList) {
+        let data = response.data
+        this.excelData = data[0] || []
+        this.import_step = 2
+      },
+      handleErrorFile(response, file, fileList) {
+        this.import_step = 2
+      },
+      downTemplate() {
+        this.$request.post(this.$interface.DOWNLOAD_TEMPLATE, {
+          header: {token: this.token},
+          brandId: this.brand_id,
+          dataSourceId: 1,
+          year: this.this_year
+        }, (response) => {
+          let filename = this.getFileName(response.headers)
+          this.downloadFile(response.data, filename)
+        }, this.failure)
+      },
+      autoFillData() {
+        if (this.import_step == 1) {
+          this.showErrorTips = true
+          return
+        }
+        this.brand_target = this.deepCopy(this.excelData.brandTarget)
+        this.model_target = this.deepCopy(this.excelData.subModelTarget)
+        this.dialogTableVisible = false
+      },
+
+      POST_NATIONAL_TARGET_DRAFT(cb) {
+        let serial_number = sessionStorage.getItem('iways_uuid') || ''
+        if (!!serial_number) {
+          this.serial_number = serial_number
+          this.$router.push({path: '/zhiku/xl/country/target', query: {serial_number: this.serial_number}})
+          this.PUT_TOTAL_TARGET(false, cb)
+          return
+        }
+        this.$request.post(this.$interface.POST_NATIONAL_TARGET_DRAFT, {
+          header: {token: this.token},
+          data_source: 1,
+          title: "",
+          year: this.this_year
+        }, (response) => {
+          this.serial_number = response.data[0].serial_number || ''
+          sessionStorage.setItem('iways_uuid', this.serial_number)
+          this.$router.push({path: '/zhiku/xl/country/target', query: {serial_number: this.serial_number}})
+          this.PUT_TOTAL_TARGET(false, cb)
+        }, this.failure)
+      },
+      NATIONAL_MAKING_INFO(cb) {
+        let serial_number = sessionStorage.getItem('iways_uuid') || ''
+        if (!!serial_number) {
+          this.serial_number = serial_number
+          this.$router.push({path: '/zhiku/xl/country/target', query: {serial_number: this.serial_number}})
+          this.PUT_TOTAL_TARGET(false, cb)
+          return
+        }
+        this.$request.post(this.$interface.NATIONAL_MAKING_INFO, {
+          header: {token: this.token},
+          brandId: this.brand_id,
+          data_source: 1,
+          year: this.this_year
+        }, (response) => {
+          this.serial_number = response.data[0].serialNumber || ''
+          sessionStorage.setItem('iways_uuid', this.serial_number)
+          this.$router.push({path: '/zhiku/xl/country/target', query: {serial_number: this.serial_number}})
+          this.PUT_TOTAL_TARGET(false, cb)
+        }, (response) => {
+          response = {
+            data : [ {
+              defaultTitle : "2018年目标-初次制定",
+              makingStep : "TOTAL",
+              serialNumber : "D201803180012"
+            } ],
+            result_code : "200",
+            result_msg : "执行成功"
+          }
+          this.serial_number = response.data[0].serialNumber || ''
+          sessionStorage.setItem('iways_uuid', this.serial_number)
+          this.$router.push({path: '/zhiku/xl/country/target', query: {serial_number: this.serial_number}})
+          this.GET_TOTAL_TARGET(false, cb)
+        })
+      },
+      GET_TOTAL_TARGET(resplit, cb=()=>{}) {
+        this.$request.get(this.$interface.PUT_TOTAL_TARGET, {
+          header: {token: this.token},
+          serialNumber: this.serial_number,
+        }, (response) => {
+          this.loading = false
+          let data = response.data[0]
+          this.brand_target = data.brandTarget
+          this.model_target = data.subModelTarget
+          typeof cb == 'function' ? cb(response) : ''
+        }, (response) => {
+          this.brand_target = this.deepCopy(this.excelData.brandTarget)
+          this.model_target = this.deepCopy(this.excelData.subModelTarget)
+          this.complete = true
+        })
+      },
+      PUT_TOTAL_TARGET(resplit, cb=()=>{}) {
+        this.loading = true
+        let brand_target_obj = []
+        if (!!this.brand_sales_target) {
+          brand_target_obj = [{id: this.brand_target.brand.id, sales: this.brand_sales_target}]
+        }
+        this.$request.put(this.$interface.PUT_TOTAL_TARGET, {
+          header: {token: this.token},
+          brandTarget: brand_target_obj,
+          subModelTarget: this.sub_model_sales_target_obj || [],
+          serialNumber: this.serial_number,
+          resplit: resplit !== undefined ? resplit : this.resplit
+        }, (response) => {
+          this.loading = false
+          let data = response.data[0]
+          this.brand_target = data.previous_level
+          this.model_target = data.list
+          typeof cb == 'function' ? cb(response) : ''
+        }, (response) => {
+          if (response.result_code == "400" && response.result_msg == "Bad Request: 目标草稿已过期或不存在") {
+            sessionStorage.removeItem('iways_uuid')
+            this.POST_NATIONAL_TARGET_DRAFT(cb)
+          } else {
+            this.failure(response)
+          }
+        })
+      },
+    },
+    components:{
+      BiBar,
+      BiPanel,
+      BiEmpty,
+    }
+  }
+</script>
+
+<style lang="scss" type="text/scss" scoped>
+</style>

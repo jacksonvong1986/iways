@@ -1,0 +1,463 @@
+<template>
+
+  <div>
+    <bi-bar columnTitle="目标制定">
+      <template slot="button">
+        <span class="mgr20 mgl10">时间：2018/03</span>
+        <span class="mgr20">管理维度：全国</span>
+        <span class="mgr20">管理类型：零售量</span>
+      </template>
+      <template slot="right">
+        <el-breadcrumb separator="/">
+          <span class="bread-legend">当前位置：</span>
+          <el-breadcrumb-item :to="{ path: '/' }">概览主页</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/zhiku/xl' }"> 销量目标管理</el-breadcrumb-item>
+          <el-breadcrumb-item> 目标制定</el-breadcrumb-item>
+        </el-breadcrumb>
+      </template>
+    </bi-bar>
+
+    <div class="content">
+      <bi-panel :operating="false" >
+        <template slot="title">按区域车型制定目标</template>
+        <div class="cyc-xl-step">
+          <ul class="step-bar">
+            <li class="end">
+              <span><i class="iconfont icon-check"></i></span>
+              <div>
+                已完成
+                <em></em>
+                <small>请输入全国总目标</small>
+              </div>
+            </li>
+            <li class="active">
+              <span>2</span>
+              <div>
+                待进行
+                <em></em>
+                <small>按区域车型制定目标</small>
+              </div>
+            </li>
+            <li>
+              <span>3</span>
+              <div>
+                待进行
+                <em></em>
+                <small>按车型区域月份制定</small>
+              </div>
+            </li>
+            <li>
+              <span>4</span>
+              <div>
+                待进行
+                <small>预览结果并下发任务</small>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </bi-panel>
+      <bi-panel :operating="false" >
+        <div v-loading="loading" style="min-height: 300px;">
+          <table class="cyc-xl-table_va" :class="model_group_status" @click="tableClick()">
+            <thead class="big">
+              <tr>
+                <th width="14%">区域-车型</th>
+                <th width="15%">TY-2018目标</th>
+                <th width="6%">构成比%</th>
+                <th width="8%">最新目标 - 相对 <br/> 去年增速</th>
+                <th width="8%">2018 <br/> 行业预测增速</th>
+                <th width="8%">TY-2018目标 <br/> 客户预测</th>
+                <th width="8%">TY-2018目标 <br/> 去年份额拆分</th>
+                <th width="8%">TY-2017 <br/> 实际完成</th>
+                <th width="8%">TY-2017 <br/> 实际完成构成比%</th>
+                <th width="8%">TY <br/> ( 0 + 12 )</th>
+                <th width="8%">最新目标-相对 <br/> 0+12增速</th>
+              </tr>
+            </thead>
+            <tbody v-for="(item, key) in region_target" v-if="item.previous_level">
+              <tr class="">
+                <td><i :class="open_status[key] ? 'el-icon-remove on' : 'el-icon-circle-plus'" @click="changeOpenStatus(key)" @click.stop="clickEvent=!clickEvent"></i>{{ item.previous_level.metadata.name }}</td>
+                <td :class="region_status[key]"  @mouseenter="mouseenterInput(key)" @mouseleave="mouseleaveInput(key)"
+                    @click="focusRegionTarget(key,click_flag)" @click.stop="clickEvent=!clickEvent">
+                  <el-popover
+                    v-model="popover_status[key]"
+                    :visible-arrow="true"
+                    popper-class="cyc-xl-table_box_tips"
+                    placement="top"
+                    trigger="click">
+                    <div :class="['cyc-xl-table_tips', {'error': remainTarget < 0}]">
+                      <template v-if="remainTarget >= 0">
+                        未分配总目标：{{remainTarget | number_format}}
+                      </template>
+                      <template v-else>
+                        已超出总目标：{{remainTarget*-1 | number_format}}
+                      </template>
+                    </div>
+                  </el-popover>
+                  <div style="color:red;font-size: 12px;">
+                    <span v-if="key==1&remainTarget>0&&errortip_state">
+                      <i class="el-icon-warning"></i>&nbsp;未分配总目标：{{ remainTarget | number_format }}</span>
+                    <span v-else-if="key==1&remainTarget<0&&errortip_state">
+                      <i class="el-icon-warning"></i>&nbsp;已超出总目标：{{ remainTarget*-1 | number_format }}</span>
+                  </div>
+                  <cite v-if="key==0" style="border:0;">{{ country_sales_target*1 | number_format }}</cite>
+                  <cite v-else-if="['default'].includes(region_status[key])" @click="focusRegionTarget(key)">请输入目标数</cite>
+                  <cite v-else-if="['complete', 'error'].includes(region_status[key])" @click="focusRegionTarget(key,click_flag)">{{ region_sales_targets[key]*1 | number_format }}</cite>
+                  <input v-else
+                  type="text"
+                  placeholder="请输入目标数"
+                  @blur="blurRegionTarget(key)"
+                  @keyup="keyupRegionTarget(key)"
+                  v-focus="region_focus[key]"
+                  v-model="region_sales_targets[key]">
+                  <span class="cyc-xl-table_btn" v-if="region_hover[key]&&key!=0&&editbtn_state" @click="focusRegionTarget(key,2)">编辑</span>
+                </td>
+                <td>{{ item.previous_level.ty_ratio | multiply(100) | number_format(1) }}%</td>
+                <td>{{ item.previous_level.ty_growth_rate | multiply(100) | number_format(1) }}%</td>
+                <td>{{ item.previous_level.forecast_growth_rate | multiply(100) | number_format(1) }}%</td>
+                <td>{{ item.previous_level.cust_forecast | number_format }}</td>
+                <td>{{ item.previous_level.share_split | number_format }}</td>
+                <td>{{ item.previous_level.ly_sales | number_format }}</td>
+                <td>{{ item.previous_level.ly_ratio | multiply(100) | number_format(1) }}%</td>
+                <td>{{ item.previous_level.last_ty | number_format }}</td>
+                <td>{{ item.previous_level.ty_mom | multiply(100) | number_format(1) }}%</td>
+              </tr>
+              <template v-if="item.list && open_status[key]">
+                <tr class="secondary" v-for="(item2, key2) in item.list">
+                  <td>{{ item2.metadata.name }}</td>
+                  <td>{{ item2.ty | number_format }}</td>
+                  <td>{{ item2.ty_ratio | multiply(100) | number_format(1) }}%</td>
+                  <td>{{ item2.ty_growth_rate | multiply(100) | number_format(1) }}%</td>
+                  <td>{{ item2.forecast_growth_rate | multiply(100) | number_format(1) }}%</td>
+                  <td>{{ item2.cust_forecast | number_format }}</td>
+                  <td>{{ item2.share_split | number_format }}</td>
+                  <td>{{ item2.ly_sales | number_format }}</td>
+                  <td>{{ item2.ly_ratio | multiply(100) | number_format(1) }}%</td>
+                  <td>{{ item2.last_ty | number_format }}</td>
+                  <td>{{ item2.ty_mom | multiply(100) | number_format(1) }}%</td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </bi-panel>
+      <span class="cyc-xl-btn" @click="nextStep()">下一步：制定区域月度目标</span>
+      <router-link :to="{path: 'setva', query: {uuid: uuid}}" class="cyc-xl-btn_back">上一步：修改车型总目标</router-link>
+    </div>
+  </div>
+</template>
+
+<script type="text/ecmascript-6">
+  import BiBar from '@index/components/bar.vue'
+  import BiPanel from '@index/components/panel.vue'
+  import mixin from '@index/config/mixin'
+  import sales from './_mixin'
+  import Vue from 'vue'
+
+  export default {
+    name: '',
+    mixins: [mixin, sales],
+    data() {
+      return {
+        uuid: this.$route.query.uuid || '',
+        region_target: [],
+        resplit: this.$route.query.resplit,
+        open_status: [],
+        popover_status: [],
+        region_status: [],
+        region_focus: [],
+        region_hover: [],
+        region_sales_targets: [],
+        region_sales_target_obj: [],
+        remainTarget: 0,
+        country_sales_target: 0,
+        model_group_status: '', // 车型总目标输入框状态
+        click_flag:1,           //编辑按钮出现后的，移除输入框的点击事件（0：默认可点击，1：不可以点击，2：编辑按钮的弹框）
+        spread: true,          //是否可以展开
+        editbtn_state: true,   //编辑按钮是否出现
+        errortip_state: false, //列表顶部的错误提示
+        clickEvent: false,
+        apply: true,//当车型总目标有修改过，点空白处可以请求接口
+        loading: true
+      }
+    },
+    directives: {
+      focus: {
+        inserted: function (el, {value}) {
+          if (value) {
+            let val = Number(el.value)
+            if (val <= 0) {
+              el.value = ''
+            }
+            el.focus()
+          }
+        }
+      }
+    },
+    mounted() {
+      let cb = (response) => {
+        let data = response.data
+        , region_focus = []
+        , region_status = []
+        , popover_status = []
+        , region_total_target = 0
+        this.region_sales_targets = []
+        data.map((item, i) => {
+          let region_target = item.previous_level.ty
+          this.region_sales_targets.push(region_target)
+          region_focus[i] = false
+          region_status[i] = 'complete'
+          popover_status[i] = false
+          Vue.set(this.region_hover,i,false)
+          if (i == 0) {
+            this.country_sales_target = item.previous_level.ty
+          } else {
+            region_total_target += region_target
+          }
+        })
+        this.region_focus = region_focus
+        this.region_status = region_status
+        this.popover_status = popover_status
+        this.remainTarget = this.country_sales_target - region_total_target
+        this.model_group_status = 'completeListVb'
+      }
+      let resplit = this.resplit == undefined ? false : this.resplit
+      this.PUT_REGION_TARGET(resplit, cb)
+    },
+    watch: {
+      region_target() {
+        let data = []
+        this.open_status = []
+        this.region_target.map( (item, key) => {
+          this.open_status.push(false)
+          if (key == 0)return
+          data.push({
+            id: item.previous_level.metadata.id,
+            sales: item.previous_level.ty || ''
+          })
+        })
+        this.region_sales_target_obj = data
+      },
+      region_sales_targets() {
+        let data = []
+        for (let key in this.region_sales_target_obj) {
+          let item = this.region_sales_target_obj[key]
+          , index = Number(key) + 1 // 跳过全国总目标
+          data.push({
+            id: item.id,
+            sales: this.to_zero(this.region_sales_targets[index])
+          })
+        }
+        this.region_sales_target_obj = data
+        this.apply = true
+      },
+      remainTarget() {
+        if(this.remainTarget == 0&&this.checkNull){
+          this.spread = true
+        }else {
+          this.spread = false
+          this.open_status.map((item,i) =>{
+            Vue.set(this.open_status,i,false)
+          })
+        }
+      }
+    },
+    methods: {
+      tableClick: function () {  //大输入框失去焦点
+        let brandTargetVal = this.to_zero(this.country_sales_target)
+        this.clickEvent = false
+        if (brandTargetVal.length == 0 || brandTargetVal ==0){ //如果（品牌总目标没填，品牌总目标为0，车型总目标全部没填）则不做处理
+          this.model_group_status = 'defaultListVb'
+          return
+        }
+        if(this.remainTarget==0 && !this.checkNull()){//正确情况
+          this.model_group_status = 'completeListVb'
+          this.spread = true
+          this.editbtn_state = true                   //编辑按钮出现
+          this.click_flag = 1                          //输入框不可点击
+          this.errortip_state = false
+          if(this.apply){
+            this.PUT_REGION_TARGET(false, () => {     //全部填满并等于总目标 请求接口
+              this.apply = false
+            })
+          }
+        }else{//错误情况
+          this.model_group_status = 'errorListVb'
+          this.editbtn_state = false   //编辑按钮消失
+          this.click_flag = 0           //输入框可点击
+          this.errortip_state = true
+        }
+      },
+      changeOpenStatus(key) {
+        if (this.spread == false) {
+          this.$confirm('<div>抱歉，您的全国总目标还未分配完成，请继续<br>制定区域总目标。</div><div><strong style="font-size:20px;color:red;">'
+            + this.number_format(this.remainTarget >= 0 ? this.remainTarget : (this.remainTarget*-1))
+            + '</strong></div><div><em>未分配全国目标</em>', '温馨提示', {
+            type: 'error',
+            center: true,
+            showCancelButton: false,
+            showConfirmButton: false,
+            dangerouslyUseHTMLString: true
+          }).catch(() => {});
+        }else {
+          this.model_group_status = 'defaultListVb'
+          this.open_status = this.open_status.map((item, index) => {
+            return index == key ? !item : item
+          })
+        }
+      },
+      focusRegionTarget(key,click_flag) {
+        if(click_flag==2){
+          this.$confirm('<p>亲爱的，您区域总目标已分配完成， <br/>您确定要修改区域总目标？</p>', '温馨提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '放弃',
+            type: 'warning',
+            center: true,
+            dangerouslyUseHTMLString: true
+          }).then(() => {
+            Vue.set(this.popover_status,key,true)
+            Vue.set(this.region_status,key,'edit')
+            Vue.set(this.region_focus,key,true)
+            this.model_group_status = 'editListVb'
+            this.errortip_state = false
+            this.editbtn_state = false
+            this.click_flag = 0
+            this.open_status.map((item,i) =>{ //收起展开的内容
+              Vue.set(this.open_status,i,false)
+            })
+          }).catch(() => {
+          });
+        }else if(click_flag==1){
+          return
+        }else if(key ==0){//点击第一个全国总目标的时候
+          if(this.remainTarget==0 && !this.checkNull()){//正确情况
+            this.model_group_status = 'completeListVb'
+            this.spread = true
+            this.editbtn_state = true          //编辑按钮出现
+            this.click_flag = 1                 //输入框不可点击
+            this.errortip_state = false
+            this.PUT_REGION_TARGET(false)      //全部填满并等于总目标 请求接口
+          }else{//错误情况
+            this.model_group_status = 'errorListVb'
+            this.editbtn_state = false         //编辑按钮消失
+            this.click_flag = 0                 //输入框可点击
+            this.errortip_state = true
+          }
+        }else {
+          Vue.set(this.popover_status,key,true)
+          Vue.set(this.region_status,key,'edit')
+          Vue.set(this.region_focus,key,true)
+          this.model_group_status = 'editListVb'
+          this.errortip_state = false
+        }
+      },
+      blurRegionTarget(key){
+        let inputVal = this.region_sales_targets[key]
+        Vue.set(this.popover_status,key,false)
+        Vue.set(this.region_status,key,'complete')
+        Vue.set(this.region_focus,key,false)
+        if(inputVal.length == 0){
+          Vue.set(this.region_status,key,'default')
+          Vue.set(this.region_focus,key,false)
+        }else {
+          this.region_sales_targets[key] = this.to_zero(inputVal)
+        }
+      },
+      keyupRegionTarget(key){
+        this.calRemainTarget()
+      },
+      mouseenterInput(key){
+        if(this.region_status[key]=='complete'){
+          Vue.set(this.region_hover,key,true)
+        }
+      },
+      mouseleaveInput(key){
+        Vue.set(this.region_hover,key,false)
+      },
+      calRemainTarget() {
+        let region_sales_total_target = 0
+        for(let i in this.region_sales_targets){
+          if (i == 0)continue
+          region_sales_total_target += this.to_zero(this.region_sales_targets[i])
+        }
+        this.remainTarget = this.country_sales_target - region_sales_total_target
+      },
+      nextStep() {
+        if(this.remainTarget != 0){
+          this.$confirm('<div>抱歉，您的全国总目标还未分配完成，请继续<br>制定区域总目标。</div><div><strong style="font-size:20px;color:red;">'
+            + this.number_format(this.remainTarget >= 0 ? this.remainTarget : (this.remainTarget*-1))
+            + '</strong></div><div><em>未分配全国目标</em>', '温馨提示', {
+            type: 'error',
+            center: true,
+            showCancelButton: false,
+            showConfirmButton: false,
+            dangerouslyUseHTMLString: true
+          }).catch(() => {});
+          this.model_group_status = true
+        } else {
+          this.PUT_REGION_TARGET(false, (response) => {
+            if (!!response.verify_msg) {
+              alert(response.verify_msg)
+            }
+            this.$router.push({path: '/zhiku/xl/country/target/setvc', query: {uuid: this.uuid, resplit: true}})
+          })
+        }
+      },
+      checkNull() { //检查车型总目标是否存在未填的
+        let isNull = false
+        this.region_sales_targets.map( (item,i) =>{
+          if(item.length == 0){
+            isNull = true
+          }
+        })
+        return isNull
+      },
+      checkAllNull() { //检查车型总目标是否全部未填的
+        let isAllNull = true
+        this.region_sales_targets.map( (item,i) =>{
+          if(item.length != 0){
+            isAllNull = false
+          }
+        })
+        return isAllNull
+      },
+      PUT_REGION_TARGET(resplit, cb=()=>{}) {
+        this.loading = true
+        this.$request.put(this.$interface.PUT_REGION_TARGET, {
+          header: {token: this.token},
+          region_target: this.region_sales_target_obj || [],
+          uuid: this.uuid,
+          resplit: resplit !== undefined ? resplit : this.resplit
+        }, (response) => {
+          this.loading = false
+          let data = response.data
+          this.region_target = data
+          typeof cb == 'function' ? cb(response) : ''
+        }, (response) => {
+          if (response.result_code == "400" && response.result_msg == "Bad Request: 目标草稿已过期或不存在") {
+            sessionStorage.removeItem('iways_uuid')
+            this.$router.push({path: '/zhiku/xl/country/target/setva'})
+          } else {
+            this.failure(response)
+          }
+        })
+      }
+    },
+    components:{
+      BiBar,
+      BiPanel,
+    }
+  }
+</script>
+
+<style lang="scss" type="text/scss" scoped>
+  .editListVb tbody:nth-of-type(2) tr:first-child td:nth-child(2){border-top: 1px solid #3399ff;}
+  .editListVb tbody:last-of-type tr:first-child td:nth-child(2){border-bottom: 1px solid #3399ff;}
+  .editListVb tbody:nth-of-type(n+2) tr td:nth-child(2){border-left: 1px solid #3399ff;border-right: 1px solid #3399ff;}
+  .completeListVb tbody:nth-of-type(2) tr:first-child td:nth-child(2){border-top: 1px solid #99cc00;}
+  .completeListVb tbody:last-of-type tr:last-child td:nth-child(2){border-bottom: 1px solid #99cc00;}
+  .completeListVb tbody:nth-of-type(n+2) tr td:nth-child(2){border-left: 1px solid #99cc00;border-right: 1px solid #99cc00;}
+  .errorListVb tbody:nth-of-type(2) tr:first-child td:nth-child(2){border-top: 1px solid #f04848;}
+  .errorListVb tbody:last-of-type tr:last-child td:nth-child(2){border-bottom: 1px solid #f04848;}
+  .errorListVb tbody:nth-of-type(n+2) tr td:nth-child(2){border-left: 1px solid #f04848;border-right: 1px solid #f04848;}
+</style>

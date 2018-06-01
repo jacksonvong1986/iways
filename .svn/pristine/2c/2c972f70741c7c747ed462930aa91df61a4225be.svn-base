@@ -1,0 +1,161 @@
+import Vue from 'Vue'
+import { mapActions } from 'vuex'
+import { USER_DIMENSION } from '@/store/user'
+import moment from 'moment'
+
+export default {
+  data() {
+    return {
+      year_month: '2018/03',
+      manage_dimension: '全国',
+      manage_type: '零售量',
+      uri_map: [
+        '', 'country', 'area', 'province'
+      ],
+      dimension_id: '',
+      dimension_name: '',
+    }
+	},
+  computed: {
+    this_year() {
+      var m = moment()
+      return m.get('y')
+    },
+    manage_type_id() {
+      let dimensions = this.$store.state.user.dimension
+      return dimensions[0].manage_type_id || ''
+    },
+    dimension() {
+      var dimensions = this.$store.state.user.dimension || []
+      var path = this.$route.path
+      var dimension = dimensions.find(item => {
+        let uri= this.uri_map[item.manage_type_id] || ''
+        return path.indexOf(uri) != -1
+      }) || {}
+      return dimension
+    }
+  },
+  mounted() {
+    this.GET_DATA_TIME()
+    this.dimension_id = this.dimension.object_id || ''
+    this.dimension_name = this.dimension.manage_name || ''
+  },
+  methods: {
+    ...mapActions([USER_DIMENSION]),
+    to_zero(num){
+      num = num.toString().replace(/\,/g, '')*1
+      num = num>100000000?100000000:num
+      if(!num || num <0 || isNaN(num)){
+        num = 0
+      }
+      return Math.round(Number(num))
+    },
+    GET_DATA_TIME(cb=()=>{}) {
+      this.$request.get(this.$interface.GET_DATA_TIME, {
+        header: {token: this.token},
+      }, (response) => {
+        let data = response.data[0] || []
+        this.year_month = data.end_time || this.year_month
+      }, (response) => {
+      })
+    },
+    expireWithUUID(response, cb) {
+      if (response.result_code == "200" && response.result_msg == "OK: 目标草稿已过期或不存在") {
+        sessionStorage.removeItem('iways_uuid')
+        typeof cb == 'function' ? cb() : ''
+      }
+    },
+    groupByBrandName(regions, level = 'region') {
+      let data = []
+      regions.map(region => {
+        let region_name = region.previous_level.name
+        let matches = region_name.match(/(.*)\d/)
+        let brand_name = matches && matches[1] ? matches[1] : region_name
+
+        let brandIndex = data.findIndex(brand => {
+          return brand.label == brand_name
+        })
+        if (!(brandIndex >= 0)) {
+          brandIndex = data.length
+          data[brandIndex] = []
+        }
+        data[brandIndex].value = brandIndex
+        data[brandIndex].label = brand_name
+        if (!data[brandIndex]['children']) {
+          data[brandIndex]['children'] = []
+        }
+        let item = {
+          value: region.previous_level.id,
+          label: region.previous_level.name,
+        }
+        if (level == 'province') {
+          item['children'] = region.list.map( item => {
+            return {
+              value: item.id,
+              label: item.name,
+            }
+          })
+        }
+        data[brandIndex]['children'].push(item)
+      })
+      return data
+    },
+    updateDimension(object_id, manage_name) {
+      let data = []
+      let dimensions = this.$store.state.user.dimension
+      var path = this.$route.path
+      var dimensionIndex = dimensions.findIndex(item => {
+        let uri= this.uri_map[item.manage_type_id] || ''
+        return path.indexOf(uri) != -1
+      })
+      data = dimensions.map( (item, key) => {
+        if (key == dimensionIndex) {
+          item = {
+            object_id: object_id,
+            manage_name: manage_name,
+            manage_type_id: item.manage_type_id
+          }
+        }
+        return item
+      })
+      this.USER_DIMENSION(data)
+    },
+    downloadFile (data, filename) {
+      if (!data) {
+        return
+      }
+      let url = window.URL.createObjectURL(new Blob([data]))
+      let link = document.createElement('a')
+      link.style.display = 'none'
+      link.href = url
+      link.setAttribute('download', filename || 'excel.xlsx')
+
+      document.body.appendChild(link)
+      link.click()
+    },
+    getFileName(headers) {
+      if (!headers || !headers['content-disposition'])return
+      let headerInfo = headers['content-disposition'].split(';')
+      let filename = ''
+      for (let x in headerInfo) {
+        let item = headerInfo[x]
+        item = item.trim().split('=')
+        if (item.length == 2 && item[0] == 'filename*') {
+          filename = item[1]
+          break
+        }
+      }
+      if (filename.indexOf("''") != -1) {
+        return decodeURIComponent(filename.split("''")[1]) || ''
+      }
+      return
+    },
+    deepCopy(source) { 
+      var result = {}
+      for (var key in source) {
+        result[key] = typeof source[key]==='object'? deepCoyp(source[key]): source[key];
+      }
+      return result; 
+    },
+  }
+}

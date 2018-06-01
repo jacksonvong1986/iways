@@ -1,0 +1,111 @@
+export default {
+  LOGIN: '/ajax/auth/login',
+  LOGOUT: '/ajax/auth/logout',
+  MENUS: '/ajax/index/menus',
+  REFRESH: '/ajax/auth/refresh',
+  LOGIN_BY_CODE: '/ajax/auth/loginbycode',
+
+  // 首页
+  GET_PV_STATUS: '/home-page/pv-status', // 细分市场走势情况
+  GET_SALES: '/home-page/sales', // 整体市场销量
+  GET_SALES_SHARE: '/home-page/sales-share',  // 份额走势
+  GET_SALES_TREND: '/home-page/sales-trends', // 数据趋势
+
+  // 厂商销量目标
+  GET_MANFS: '/sales/common/get_mfs',
+  GET_MANF_INFO: '/sales/common/get_mi',
+  GET_DATA_SOURCE: '/sales/common/get_dr',
+  GET_WHOLE_SALES: '/sales/msc/status',
+  GET_WHOLE_SALES_WARNING: '/sales/msc/warning',
+  GET_SEGMENTS_SALES: '/sales/msc/segments',
+  GET_SEGMENTS_SALES_WARNING: '/sales/msc/segmentw',
+  GET_MANF_SALES_RANK: '/sales/msc/manfrank',
+  GET_NATION_SALES: '/sales/msc/natis',
+  GET_GROUPS_SALES: '/sales/msc/groups',
+  GET_BRANDS_SALES: '/sales/msc/brands',
+  GET_REGIONS_SALES: '/sales/msc/regions',
+  GET_MODELS_SALES: '/sales/msc/msmd',
+
+  // 车型看板
+  GET_MODEL_INFO: '/sales/common/get_smi',
+  GET_MODEL_SALES: '/sales/model/status',
+  GET_MODEL_SALES_WARNING: '/sales/model/warning',
+  GET_MODEL_REGIONS_SALES: '/sales/model/regions',
+  GET_MARKET_CONCENTRATION: '/sales/model/cctt',
+  GET_SEGMENTS_TREND: '/sales/model/trend',
+
+  // 周度预警
+  GET_MF_OVERVIEW: '/warning/warning/mf_overview',
+  GET_REGION_OVERVIEW: '/warning/warning/region_overview',
+  GET_SEG_OVERVIEW: '/warning/warning/seg_overview',
+  GET_SM_OVERVIEW: '/warning/warning/sm_overview',
+  GET_WARNING_TREND: '/warning/warning/warning_trend',
+  GET_SEG: '/warning/warning/seg',
+  GET_SM_BY_MB: '/warning/warning/sm_by_mb',
+  GET_SEG_SUBSEG: '/warning/warning/seg_subseg',
+
+  // 新闻舆情
+  GET_NEWS_BASE_INFO: '/news/news/get_base_info',
+  GET_NEWS_PAGE: '/news/news/get_page',
+  GET_NEWS_RECOMMEND: '/news/news/recommend',
+  GET_NEWS_DETAIL: '/news/news/get_detail',
+  GET_NEWS_HOT: '/news/news/hot_news',
+
+
+  // 售后
+  GET_COMMON_COMPETITORS: '/after-sales/common/competitors', //子车型竞品
+  GET_COMMON_MANFS_BRANDS: '/after-sales/common/manfs-brands', //厂商品牌
+  GET_COMMON_VALID_DATE: '/after-sales/common/valid-date', //数据有效时间
+
+  GET_PART_CAR_PRICE: '/after-sales/part/car-prices', //配件-整车价格
+  GET_PART_PRICE_DEVIATIONS: '/after-sales/part/price-deviations', //配件价格偏离
+  GET_PART_PRICE_DIFFS: '/after-sales/part/price-diffs', //配件价格差异
+  GET_PART_PRICE_SUM: '/after-sales/part/price-sum', //配件总价格
+  GET_PART_PRICES: '/after-sales/part/prices', //配件价格
+  GET_PART_TYPES: '/after-sales/part/types', //可比配件分类信息
+
+  GET_COST_HOURLY_WAGE_SUM: '/after-sales/cost/hourly-wage-sum', //配件总工时价格
+  GET_COST_HOURLY_WAGES: '/after-sales/cost/hourly-wages', //配件工时价格
+  GET_COST_USE_COST_SUM: '/after-sales/cost/use-cost-sum', //配件总用车成本
+  GET_COST_USE_COSTS: '/after-sales/cost/use-costs', //配件用车成本
+
+  GET_FILE_REPORT_LIST: '/after-sales/report/report-list', //报告列表
+  GET_FILE_TYPES: '/after-sales/report/types', //文件类别
+  GET_REPORT_FILE: '/after-sales-manage/report-file',
+
+  // 商圈
+  getBusiCirList: '/business-circle/business-circle/getBusiCirList',
+  getBusiCirStatistics: '/business-circle/business-circle/getBusiCirStatistics',
+  getCityStatistics: '/business-circle/business-circle/getCityStatistics',
+  getDealerList: '/business-circle/business-circle/getDealerList',
+  getInBusiCirDealers: '/business-circle/business-circle/getInBusiCirDealers',
+  getOutBusiCirDealers: '/business-circle/business-circle/getOutBusiCirDealers',
+  queryConditions: '/business-circle/business-circle/queryConditions',
+
+  // 销量目标 1.0
+  GET_SUBMODEL: '/sales-target/common/sub_model',
+  GET_DATA_TIME: '/sales-target/common/data_time', // 获取销量时间
+  GET_NEWST_TARGET: '/sales-target/common/newst_target', //获取客户最新的目标ID
+  GET_REGION: '/sales-target/common/region', //获取客户的所有区域-省份
+  GET_SUB_MODEL: '/sales-target/common/sub_model', //获取客户的所有品牌-子车型
+  GET_USER_PERMISSION: '/sales-target/common/user_permission', //获取用户权限
+  GET_MONTH_FORECAST: '/sales-target/forecast/month_forecast', //月度销量监测预警
+  GET_MONTH_FORECAST_HEADER: '/sales-target/forecast/month_forecast_header', //月度销量监测预警HEADER
+  GET_TOTAL_FORECAST: '/sales-target/forecast/total_forecast', //总销量监测预警
+  PUT_MONTH_TARGET: '/sales-target/target/month_target', //月度(区域或省份)销量目标
+  POST_NATIONAL_TARGET_DRAFT: '/sales-target/target/national_target_draft', //全国目标草稿
+  PUT_REGION_TARGET: '/sales-target/target/region_target', //(区域或省份)销量目标
+  POST_TARGET: '/sales-target/target/target', //下发目标
+  PUT_TOTAL_TARGET: '/sales-target/target/total_target', // 总销量目标
+  GET_TARGET_DETAIL: '/sales-target/target/target_detail',
+  GET_TARGET_LOG: '/sales-target/target/target_log',
+  GET_TARGET_LOG_PAGE: '/sales-target/target/target_log_page',
+  GET_TARGET_OVERVIEW: '/sales-target/target/target_overview',
+  POST_REGION_TARGET_DRAFT: '/sales-target/target/region_target_draft',
+  GET_USER_INFO: '/sales-target-extend/user_info',
+
+  // sales-target 2.0
+  UPLOAD_FILE: '/sales-target/national/import',
+  DOWNLOAD_TEMPLATE: '/sales-target/national/template',
+  NATIONAL_MAKING_INFO: '/sales-target/national/making-info',
+}

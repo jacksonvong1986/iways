@@ -1,0 +1,393 @@
+<template>
+  <div>
+    <bi-bar columnTitle="监测预警">
+      <template slot="button">
+        <span class="mgr20 mgl10">时间：{{ year_month }}</span>
+        <span class="mgr20">管理维度：{{ dimension_name }}</span>
+        <span class="mgr20">管理类型：{{ manage_type }}</span>
+      </template>
+      <template slot="right">
+        <el-breadcrumb separator="/">
+          <span class="bread-legend">当前位置：</span>
+          <el-breadcrumb-item :to="{ path: '/' }">概览主页</el-breadcrumb-item>
+          <el-breadcrumb-item> 销量目标管理</el-breadcrumb-item>
+          <el-breadcrumb-item> 全国 - 监测预警</el-breadcrumb-item>
+        </el-breadcrumb>
+      </template>
+    </bi-bar>
+
+    <div class="content cyc-xl-targetList" style="min-height: 200px">
+      <bi-panel :operating="false" >
+        <div class="cyc-xl-search">
+          <div class="selected-box">
+            <template v-if="false">
+              已选条件：
+              <div class="panel-selected_vc">
+                <span>
+                  <template v-for="(val, key) in selected_model_id" >
+                    <font> {{val}} <i @click="changeModel(val)">x</i></font>
+                  </template>
+                   <template v-for="(val, key) in selected_area_id" >
+                    <font> {{val}} <i @click="changeModel(val)">x</i></font>
+                  </template>
+                </span>
+                <cite>重置条件</cite>
+              </div>
+            </template>
+            <template v-else>
+            请选择条件
+            </template>
+          </div>
+          <div v-loading="loading[0]" element-loading-background="#fff" >
+            <dl>
+              <dt>品牌：</dt>
+              <dd>
+                <template v-for="brand in brands">
+            <span
+              :class="{'on': brand.previous_level.id == selected_brand_id}"
+              @click="changeBrand(brand.previous_level.id, brand.previous_level.name)">
+              {{ brand.previous_level.name }}
+            </span>
+                </template>
+              </dd>
+            </dl>
+            <dl>
+              <dt>车型：</dt>
+              <dd>
+                <span :class="{'on': selected_model_id.length == 0}" @click="changeModel()">不限</span>
+                <template v-for="model in models">
+            <span
+              :class="[selected_model_id.indexOf(model.id) > -1 ? 'on': '']"
+              @click="changeModel(model.id, model.name)"> {{ model.name }}
+            </span>
+                </template>
+              </dd>
+            </dl>
+            <dl>
+              <dt>区域：</dt>
+              <dd>
+                <span :class="{'on': selected_area_id.length == 0}" @click="changeArea()">全国</span>
+                <template v-for="area in areas">
+            <span
+              :class="[selected_area_id.indexOf(area.previous_level.id) > -1 ? 'on': '']"
+              @click="changeArea(area.previous_level.id, area.previous_level.name)">
+              {{ area.previous_level.name}}
+            </span>
+                </template>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </bi-panel>
+      <h2 class="panel-condition">
+        当前共选：
+        <b>1</b>个品牌，
+        <b>{{ selected_model_id.length > 0 ? selected_model_id.length + '个' : '所有' }}</b>车型，
+        <b>{{ selected_area_id.length > 0 ? selected_area_id.length + '个' : '所有' }}</b>区域
+        <!--<span>-->
+          <!--<font class="on">按区域显示</font>-->
+          <!--<font>按车型显示</font>-->
+        <!--</span>-->
+      </h2>
+      <div v-loading="loading[1]" element-loading-background="#fff" style="min-height: 200px">
+        <template  v-for="(item,key) in forecast">
+          <bi-panel :operating="false">
+            <template slot="title">
+              <router-link
+                target="_blank"
+                class="link"
+                :to="{path:'alarm/detail',query:{type:'region', area_id: item['previous_level']['id'], area_name: item['previous_level']['name'], dimension: manageDimension}}">
+                {{ item['previous_level']['name']}}
+              </router-link>
+            </template>
+            <template slot="others">
+            <span class="cyc-xl-title-tips">
+              <font>关联ID：{{ newstTarget['serial_number'] }}</font>
+              <font>制定日期： {{ newstTarget['create_time'] }}</font>
+            </span>
+            </template>
+            <div v-if="item.list.length > 0" style="max-width: 100%; overflow-x: auto; overflow-y: hidden">
+              <table class="cyc-xl-table_vc" >
+                <thead>
+                <tr>
+                  <th rowspan="2">车型</th>
+                  <th rowspan="2">指标</th>
+                  <th colspan="3">YTD实际完成</th>
+                  <th rowspan="2">去年同期实际完成率</th>
+                  <th colspan="2">目标</th>
+                  <th colspan="2">最新市场预测（维持YTD份额）</th>
+                  <th colspan="2">最新市场预测（维持RTG份额）</th>
+                  <th colspan="2">最新市场预测（维持TY份额）</th>
+                </tr>
+                <tr>
+                  <th>实际完成销量</th>
+                  <th>份额</th>
+                  <th>目标完成率</th>
+                  <th>RTG</th>
+                  <th>TY</th>
+                  <th>RTG</th>
+                  <th>TY</th>
+                  <th>RTG</th>
+                  <th>TY</th>
+                  <th>RTG</th>
+                  <th>TY</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="(item2, key2) in item.list">
+                  <td>
+                    <router-link target="_blank" :to="{path:'alarm/detail',query:{type:'model', brand_name:item2.brand_name, brand_id:item2.brand_id, model_name:item2.metadata.name, model_id: item2.metadata.id, area_id: item['previous_level']['id'], area_name: item['previous_level']['name']}}">
+                      {{item2.metadata.name}}
+                    </router-link>
+                  </td>
+                  <td>销量</td>
+                  <td>{{item2.sales | number_format }}</td>
+                  <td>{{item2.share | multiply(100) | number_format(1) }}%</td>
+                  <td>{{item2.cr | multiply(100)  | number_format(1) }}%</td>
+                  <td>{{item2.last_year_cr | multiply(100) | number_format(1)}}%</td>
+                  <td>{{item2.target.rtg | number_format  }}</td>
+                  <td>{{item2.target.ty | number_format  }}</td>
+                  <td>{{item2.keep_ytd.rtg | number_format }}</td>
+                  <td>{{item2.keep_ytd.ty | number_format }}</td>
+                  <td>{{item2.keep_rtg.rtg | number_format }}</td>
+                  <td>{{item2.keep_rtg.ty | number_format }}</td>
+                  <td>{{item2.keep_ty.rtg | number_format }}</td>
+                  <td>{{item2.keep_ty.ty | number_format }}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <bi-empty v-else-if="complete" style="margin: 50px auto">
+              <span slot="tips">亲爱的，暂时没有相关数据，请先完成目标制定！如还有疑问，请联系客户管理员。</span>
+            </bi-empty>
+          </bi-panel>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script type="text/ecmascript-6">
+  import BiBar from '@index/components/bar.vue'
+  import BiPanel from '@index/components/panel.vue'
+  import mixin from '@index/config/mixin'
+  import BiEmpty from '@index/components/empty.vue'
+  import sales from './_mixin'
+
+  export default {
+    name: '',
+    mixins: [mixin, sales],
+    data() {
+      return {
+        newstTarget: '',  //最新制定目标信息
+        serialNumber: '', //最新制定目标信息的流水号
+        dataTime: '',  //数据时间
+        manageDimension: 'NATIONAL',  // 管理维度
+        brands: [], // 展示的品牌数据
+        models: [], // 展示的车型数据
+        areas: [],  //  展示的地区数据
+        forecast: [], //展示的预警数据
+        allAreas: [],  // 所有的地区数据
+        selected_brand_id:'', //选中的品牌ID
+        selected_brand_name:'', //选中的品牌name
+        selected_model_id:[], //选中的车型ID
+        selected_area_id: [],  //选中的地区ID
+        complete: false,
+        loading: new Array(2).fill(false)
+      }
+    },
+    computed: {
+      selected_all_model_id () {
+        let all_model_id = []
+        for (let item in this.models) {
+          all_model_id.push(this.models[item]['id'])
+        }
+        return all_model_id
+      },
+      area_id_name () {
+        //地区对应的ID和名字
+        let area_info = {}
+        for (let item in this.allAreas){
+          area_info[this.allAreas[item]['previous_level']['id']] = this.allAreas[item]['previous_level']['name']
+        }
+        return area_info
+      }
+    },
+    mounted(){
+      this.getToken(() => {
+        this.getNewstTarget()
+      })
+    },
+    methods: {
+      getDataTime() {
+        this.$request.get(this.$interface.GET_DATA_TIME,{
+          header: {token: this.token}
+        }, (response) => {
+          this.dataTime = response.data[0]['end_time']
+          this.getSubModel()
+        }, this.failure)
+      },
+      getNewstTarget(){
+        this.$request.get(this.$interface.GET_NEWST_TARGET,{
+          header: {token: this.token},
+          manage_dimension: this.manageDimension,
+        }, (response) => {
+          this.newstTarget = response.data[0] || ''
+          if (this.newstTarget['serial_number']){
+            this.serialNumber = this.newstTarget['serial_number'] ? this.newstTarget['serial_number'] : ''
+            this.getDataTime()
+           }else{
+             this.loading[0] = false
+             this.loading[1] = false
+             this.complete = true
+           }
+        }, this.failure)
+      },
+      getSubModel () {
+        this.$request.get(this.$interface.GET_SUB_MODEL, {
+          header: {token: this.token},
+          manage_dimension: this.manageDimension,
+          serial_number: this.serialNumber
+        }, (response) => {
+          this.brands = response.data || []
+          this.getRegion()
+        }, this.failure)
+      },
+      getRegion() {
+        this.$request.get(this.$interface.GET_REGION, {
+          header: {token: this.token},
+          serial_number: this.serialNumber
+        }, (response) => {
+          this.allAreas = response.data || []
+          this.initData()
+        }, this.failure)
+      },
+      getTotalForecast(conditions,level_name) {
+        this.loading[0] = true
+        this.loading[1] = true
+        this.$request.get(this.$interface.GET_TOTAL_FORECAST, {
+          header: {token: this.token},
+          manage_dimension: this.manageDimension,
+          ym: this.dataTime,
+          serial_number: this.serialNumber,
+          ...conditions
+        }, (response) => {
+          if (response.data.length <=0 ) {
+            this.forecast = []
+            this.loading[0] = false
+            this.loading[1] = false
+            this.complete = true
+            return
+          }
+          let responseData = response.data[0]['list']
+          let forecast = {}
+          let forecastObj = {}
+          let forecastList = []
+          for (let item in responseData) {
+            forecastObj = {
+              brand_id: this.selected_brand_id,
+              brand_name: this.selected_brand_name,
+              ...responseData[item]
+            }
+            forecastList.push(forecastObj)
+            forecast['list'] = forecastList
+            forecast['previous_level'] = { id: conditions.region_id, name: level_name}
+          }
+          this.forecast.push(forecast);
+          this.loading[0] = false
+          this.loading[1] = false
+          this.complete = true
+        }, this.failure)
+      },
+      changeBrand (brand_id = '', brand_name = '') {
+        if (brand_id == '') return;
+        this.selected_model_id = []
+        this.selected_area_id = []
+        this.selected_brand_id = brand_id
+        this.selected_brand_name = brand_name
+        this.manageDimension = 'NATIONAL'
+        this.forecast = []
+
+        this.filtersModel(brand_id)
+        this.filtersArea(brand_name)
+        this.transferGetTotalForecast(this.selected_model_id, this.selected_area_id)
+      },
+      changeModel (model_id = '', model_name) {
+        if (model_id == ''){
+          this.selected_model_id = []
+        }else{
+          let index = this.selected_model_id.indexOf(model_id)
+          index > -1 ? this.selected_model_id.splice(index, 1) : this.selected_model_id.push(model_id)
+        }
+        this.transferGetTotalForecast(this.selected_model_id, this.selected_area_id)
+      },
+      changeArea (area_id = '', area_name = "") {
+        if (area_id == ''){
+          this.selected_area_id = []
+          this.manageDimension = 'NATIONAL'
+        }else{
+          let index = this.selected_area_id.indexOf(area_id)
+          index > -1 ? this.selected_area_id.splice(index, 1) : this.selected_area_id.push(area_id)
+          this.selected_area_id.length == 0 ? this.manageDimension = 'NATIONAL' : this.manageDimension = 'REGION'
+        }
+        this.transferGetTotalForecast(this.selected_model_id, this.selected_area_id)
+      },
+      filtersArea (selected_brand_name){
+        this.areas = []
+        for (let item in this.allAreas){
+          let isTrue = this.allAreas[item]['previous_level']['name'].indexOf(selected_brand_name) > -1
+          if (isTrue){
+            this.areas.push(this.allAreas[item])
+          }
+        }
+      },
+      filtersModel (selected_brand_id) {
+        this.models = []
+        this.brands.every((val) => {
+          if (val.previous_level.id == selected_brand_id) {
+            this.models = val.list
+            return false
+          }
+          return true
+        })
+      },
+      transferGetTotalForecast (model_id, area_id){
+        // 获取预警数据
+
+        let condition = {}, level_name = ''
+        this.forecast = []
+        model_id = model_id.length == 0 ? this.selected_all_model_id : model_id
+
+        if (area_id.length == 0){
+          //选中全国
+          condition = { sub_model_id: model_id, region_id: '' }
+          level_name = '全国'
+          this.getTotalForecast(condition, level_name)
+        }else{
+          for (let item in area_id){
+            condition = {sub_model_id: model_id, region_id: area_id[item]}
+            level_name = this.area_id_name[area_id[item]]
+            this.getTotalForecast(condition, level_name)
+          }
+        }
+      },
+      initData (){
+        //默认显示第一个品牌，以及筛选第一个品牌对应的车型，区域
+        let defaultBrand = this.brands[0]
+        this.selected_brand_id = defaultBrand['previous_level']['id']
+        this.selected_brand_name = defaultBrand['previous_level']['name']
+        this.filtersModel(this.selected_brand_id)
+        this.filtersArea(this.selected_brand_name)
+
+        this.transferGetTotalForecast(this.selected_all_model_id, this.selected_area_id)
+      },
+    },
+    components:{
+      BiBar,BiPanel,BiEmpty
+    }
+  }
+</script>
+
+<style lang="scss" type="text/scss" scoped>
+
+</style>
